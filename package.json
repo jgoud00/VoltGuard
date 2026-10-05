@@ -1,0 +1,32 @@
+{
+  "name": "voltguard",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -k -n backend,simulator,frontend -c cyan,yellow,green \"npm run dev -w backend\" \"npm run dev -w simulator\" \"npm run dev -w frontend\"",
+    "build": "npm run build -w frontend",
+    "test": "node --test backend/test/*.test.js",
+    "test:ui": "playwright test",
+    "simulate": "node simulator/simulator.js",
+    "dev:hardware": "concurrently -k \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "test:soak": "node scripts/soak.js",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "workspaces": [
+    "backend",
+    "frontend",
+    "simulator"
+  ],
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.63.0",
+    "concurrently": "^9.1.2",
+    "eslint": "^10.11.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.9"
+  },
+  "type": "module"
+}

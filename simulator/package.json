@@ -1,0 +1,13 @@
+{
+  "name": "@voltguard/simulator",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node simulator.js",
+    "start": "node simulator.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.2",
+    "mqtt": "^5.14.1"
+  }
+}
