@@ -144,3 +144,14 @@ export function alerts(id, limit = 30) {
       resolvedAt: r.resolved_at,
     }));
 }
+export async function transaction(callback) {
+  db.exec('BEGIN');
+  try {
+    const result = await callback();
+    db.exec('COMMIT');
+    return result;
+  } catch (error) {
+    db.exec('ROLLBACK');
+    throw error;
+  }
+}

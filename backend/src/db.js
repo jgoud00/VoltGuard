@@ -14,15 +14,4 @@ export const alerts = store.alerts;
 export const saveTelemetry = store.saveTelemetry;
 export const saveAlert = store.saveAlert;
 export const resolveAlert = store.resolveAlert;
-export async function transaction(callback) {
-  if (!sqlite) return store.transaction(callback);
-  db.exec('BEGIN');
-  try {
-    const result = await callback();
-    db.exec('COMMIT');
-    return result;
-  } catch (error) {
-    db.exec('ROLLBACK');
-    throw error;
-  }
-}
+export const transaction = store.transaction;
