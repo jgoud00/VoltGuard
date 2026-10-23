@@ -113,20 +113,17 @@ async function tick() {
         : voltage + Math.sin(phase * 4) * 2;
   voltage = Number(voltage.toFixed(2));
   current = Number(current.toFixed(2));
-  const power = Number(Math.abs(voltage * current).toFixed(2));
-  energy += (power * elapsed) / 1000;
+  // Send raw sensor values; backend derives power/energy (single source of truth)
   const sample = validateTelemetry({
     deviceId,
     timestamp: new Date().toISOString(),
     batteryProfile: profile,
     voltage,
     current,
-    power,
-    energy,
     temperature,
-    soc,
-    soh,
-    internalResistance: resistance,
+    soc: p ? soc : undefined,
+    soh: p ? soh : undefined,
+    internalResistance: p ? resistance : undefined,
     source: 'simulation',
   });
   if (client?.connected)
