@@ -15,181 +15,122 @@ export const MODES = [
 export const topic = (id) => `voltguard/device/${id}/telemetry`;
 export const validDevice = (id) =>
   typeof id === 'string' && /^[a-zA-Z0-9_-]{1,64}$/.test(id);
+
+const RANGES = {
+  voltage: { AC230: [0, 500], '6V': [0, 20], '12V': [0, 20], LI_ION_2S: [0, 20] },
+  current: { AC230: [0, 100], '6V': [-100, 100], '12V': [-100, 100], LI_ION_2S: [-100, 100] },
+  temperature: [-40, 125],
+};
+
 export function validateTelemetry(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value))
     throw new Error('Expected JSON object');
   if (!validDevice(value.deviceId)) throw new Error('Invalid deviceId');
-  const batteryProfile =
-    value.batteryProfile === undefined ? 'AC230' : value.batteryProfile;
-  if (!PROFILES.includes(batteryProfile))
-    throw new Error('Invalid batteryProfile');
+
+  const batteryProfile = value.batteryProfile === undefined ? 'AC230' : value.batteryProfile;
+  if (!PROFILES.includes(batteryProfile)) throw new Error('Invalid batteryProfile');
+
   const timestamp =
     value.timestamp === undefined ? new Date().toISOString() : value.timestamp;
   if (
     typeof timestamp !== 'string' ||
-    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/.test(
-      timestamp,
-    ) ||
+    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/.test(timestamp) ||
     !Number.isFinite(Date.parse(timestamp)) ||
     Date.parse(timestamp) > Date.now() + 60000
   )
     throw new Error('Invalid timestamp');
-  const ranges = {
-    voltage: [0, batteryProfile === 'AC230' ? 500 : 20],
-    current: [batteryProfile === 'AC230' ? 0 : -100, 100],
-    temperature: [-40, 125],
-  };
+
+  const lithium = batteryProfile === 'LI_ION_2S';
   const result = {
     deviceId: value.deviceId,
     timestamp: new Date(timestamp).toISOString(),
     batteryProfile,
   };
-  const lithium = batteryProfile === 'LI_ION_2S';
-  if (
-    value.quality !== undefined &&
-    (!value.quality ||
-      typeof value.quality !== 'object' ||
-      Array.isArray(value.quality))
-  )
-    throw new Error('Invalid quality object');
-  const quality = {};
-  const qualityOptions = {
-    voltage: ['measured', 'averaged_unverified', 'unavailable'],
-    current: [
-      'measured',
-      'uncalibrated',
-      'calibrated_limited',
-      'below_resolution',
-      'unavailable',
-    ],
-    temperature: [
-      'measured',
-      'disconnected',
-      'conversion_failed',
-      'unavailable',
-    ],
-  };
-  for (const [key, choices] of Object.entries(qualityOptions)) {
-    const state = value.quality?.[key];
-    if (state !== undefined && !choices.includes(state))
-      throw new Error(`Invalid quality.${key}`);
-    quality[key] = state || (value[key] === null ? 'unavailable' : 'measured');
-  }
-  for (const [key, [min, max]] of Object.entries(ranges)) {
-    if (value[key] === null) {
-      if (
-        quality[key] === 'measured' ||
-        quality[key] === 'calibrated_limited' ||
-        quality[key] === 'averaged_unverified'
-      )
-        throw new Error(`Unavailable ${key} cannot be marked measured`);
+
+  // voltage, current, temperature - accept null or finite number in range
+  for (const key of ['voltage', 'current', 'temperature']) {
+    const v = value[key];
+    if (v === null) {
       result[key] = null;
       continue;
     }
-    if (
-      typeof value[key] !== 'number' ||
-      !Number.isFinite(value[key]) ||
-      value[key] < min ||
-      value[key] > max
-    )
+    if (typeof v !== 'number' || !Number.isFinite(v))
       throw new Error(`Invalid ${key}`);
-    result[key] = value[key];
-    if (
-      [
-        'uncalibrated',
-        'below_resolution',
-        'disconnected',
-        'conversion_failed',
-        'unavailable',
-      ].includes(quality[key])
-    )
-      throw new Error(`Invalid available ${key} quality`);
+    const [min, max] = key === 'voltage' || key === 'current'
+      ? RANGES[key][batteryProfile]
+      : RANGES[key];
+    if (v < min || v > max) throw new Error(`Invalid ${key}`);
+    result[key] = v;
   }
-  if (
-    lithium &&
-    result.current !== null &&
-    quality.current !== 'calibrated_limited'
-  )
-    throw new Error('LI_ION_2S current requires explicit calibration quality');
-  for (const [key, max] of Object.entries({
-    soc: 100,
-    soh: 100,
-    internalResistance: 2,
-    energy: 1e9,
-    power: 50000,
-  })) {
-    if (
-      !lithium &&
-      batteryProfile !== 'AC230' &&
-      ['soc', 'soh', 'internalResistance'].includes(key) &&
-      value[key] === undefined
-    )
-      throw new Error('Missing battery estimate: ' + key);
-    if (lithium && ['soc', 'soh', 'internalResistance'].includes(key)) {
-      if (value[key] !== undefined && value[key] !== null)
-        throw new Error(`LI_ION_2S ${key} must remain unknown`);
-      result[key] = null;
-      continue;
-    }
-    if (lithium && ['power', 'energy'].includes(key)) {
-      const marker =
-        key === 'power' ? 'nominal_noise_limited' : 'nominal_discharge_partial';
-      if (
-        value[key] !== undefined &&
-        value[key] !== null &&
-        value.quality?.[key] !== marker
-      )
-        throw new Error(`LI_ION_2S ${key} requires nominal estimate quality`);
-      if (value.quality?.[key] === marker) quality[key] = marker;
-      if (value[key] === undefined) {
-        result[key] = null;
-        continue;
+
+  // soc, soh, internalResistance - for LI_ION_2S must remain unknown; for others optional
+  for (const key of ['soc', 'soh', 'internalResistance']) {
+    const v = value[key];
+    if (lithium && v !== undefined && v !== null)
+      throw new Error(`LI_ION_2S ${key} must remain unknown`);
+    result[key] = v === undefined || v === null ? null : (Number.isFinite(v) ? v : (() => { throw new Error(`Invalid ${key}`); })());
+  }
+
+  // power, energy - for LI_ION_2S must be derived (not explicitly provided without quality); for others derived if not provided
+  for (const key of ['power', 'energy']) {
+    const v = value[key];
+    const qualityMarker = key === 'power' ? 'nominal_noise_limited' : 'nominal_discharge_partial';
+    // Allow if: not provided (undefined), explicitly null, or has correct quality marker
+    if (lithium && v !== undefined && v !== null && value.quality?.[key] !== qualityMarker)
+      throw new Error(`LI_ION_2S ${key} must remain unknown`);
+    if (v === undefined) {
+      if (key === 'power') {
+        if (result.voltage !== null && result.current !== null) {
+          result.power = lithium ? result.voltage * result.current : Math.abs(result.voltage * result.current);
+        } else {
+          result.power = null;
+        }
+      } else {
+        result.energy = 0;
       }
-    }
-    const number =
-      value[key] === undefined
-        ? key === 'power'
-          ? result.voltage === null || result.current === null
-            ? null
-            : Math.abs(result.voltage * result.current)
-          : 0
-        : value[key];
-    if (number === null) {
+    } else if (v === null) {
       result[key] = null;
-      continue;
-    }
-    if (
-      typeof number !== 'number' ||
-      !Number.isFinite(number) ||
-      number < (lithium && key === 'power' ? -50000 : 0) ||
-      number > max
-    )
+    } else if (typeof v !== 'number' || !Number.isFinite(v) || (key === 'energy' && v < 0)) {
       throw new Error(`Invalid ${key}`);
-    result[key] = number;
+    } else {
+      // Validate power matches V*I (PF=1)
+      if (key === 'power' && result.voltage !== null && result.current !== null) {
+        const expected = lithium ? result.voltage * result.current : Math.abs(result.voltage * result.current);
+        if (Math.abs(v - expected) > Math.max(1, Math.abs(expected) * 0.02))
+          throw new Error('Power must use PF=1');
+      }
+      result[key] = v;
+    }
   }
-  if (
-    result.power !== null &&
-    (result.voltage === null || result.current === null)
-  )
-    throw new Error('Power requires available voltage and current');
-  if (
-    result.power !== null &&
-    Math.abs(
-      result.power -
-        (lithium
-          ? result.voltage * result.current
-          : Math.abs(result.voltage * result.current)),
-    ) > Math.max(1, result.power * 0.02)
-  )
-    throw new Error('Power must use PF=1');
+
+  // Quality validation: if quality claims measured but value is null, reject
+  const measuredQualities = ['measured', 'calibrated_limited', 'averaged_unverified'];
+  for (const key of ['voltage', 'current', 'temperature']) {
+    const q = value.quality?.[key];
+    if (measuredQualities.includes(q) && result[key] === null)
+      throw new Error(`Unavailable ${key} cannot be marked measured`);
+  }
+
+  // LI_ION_2S: current requires calibrated_limited quality if present
+  if (lithium && result.current !== null && value.quality?.current !== 'calibrated_limited')
+    throw new Error('LI_ION_2S current requires explicit calibration quality');
+
+  // Quality markers for lithium nominal estimates
+  const quality = { ...value.quality };
+  if (lithium) {
+    if (result.power !== null) quality.power = 'nominal_noise_limited';
+    if (result.energy !== null) quality.energy = 'nominal_discharge_partial';
+  }
+
   result.source = value.source === 'simulation' ? 'simulation' : 'device';
   result.quality = quality;
-  result.status = Object.keys(ranges).some((key) => result[key] === null)
+  result.status = [result.voltage, result.current, result.temperature].some(v => v === null)
     ? 'partial'
     : lithium
       ? 'limited'
       : result.current < 0
         ? 'charging'
         : 'healthy';
+
   return result;
 }
