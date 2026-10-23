@@ -10,6 +10,16 @@ const number = (key, fallback, min = 0) => {
     throw new Error(`Invalid configuration: ${key}`);
   return value;
 };
+export const thresholds = {
+  AC230: { voltage: { high: number('VOLTAGE_HIGH', 250), low: number('VOLTAGE_LOW', 210) } },
+  '6V': { voltage: { high: number('VOLTAGE_HIGH_6V', 7.5), low: number('VOLTAGE_LOW_6V', 5.5) } },
+  '12V': { voltage: { high: number('VOLTAGE_HIGH_12V', 15), low: number('VOLTAGE_LOW_12V', 11) } },
+  LI_ION_2S: { voltage: { high: number('VOLTAGE_HIGH_LI_ION_2S', 8.4), low: number('VOLTAGE_LOW_LI_ION_2S', 6) } },
+  current: { high: number('CURRENT_HIGH', 10) },
+  temperature: { high: number('TEMPERATURE_HIGH', 50) },
+  soc: { low: number('SOC_LOW', 20) },
+  soh: { low: number('SOH_LOW', 60) },
+};
 export const config = {
   port: number('PORT', 3001),
   host: process.env.HOST || '127.0.0.1',
@@ -25,18 +35,6 @@ export const config = {
     process.env.CORS_ORIGINS || 'http://localhost:5173,http://127.0.0.1:5173'
   ).split(','),
   staleMs: number('DEVICE_OFFLINE_MS', 5000, 100),
-  currentHigh: number('CURRENT_HIGH', 10),
-  batteryHigh6: number('VOLTAGE_HIGH_6V', 7.5),
-  batteryLow6: number('VOLTAGE_LOW_6V', 5.5),
-  batteryHigh12: number('VOLTAGE_HIGH_12V', 15),
-  batteryLow12: number('VOLTAGE_LOW_12V', 11),
-  lithiumHigh2s: number('VOLTAGE_HIGH_LI_ION_2S', 8.4),
-  lithiumLow2s: number('VOLTAGE_LOW_LI_ION_2S', 6),
-  socLow: number('SOC_LOW', 20),
-  sohLow: number('SOH_LOW', 60),
-  temperatureHigh: number('TEMPERATURE_HIGH', 50),
-  voltageHigh: number('VOLTAGE_HIGH', 250),
-  voltageLow: number('VOLTAGE_LOW', 210),
 };
-if (config.voltageLow >= config.voltageHigh)
+if (thresholds.AC230.voltage.low >= thresholds.AC230.voltage.high)
   throw new Error('VOLTAGE_LOW must be below VOLTAGE_HIGH');
