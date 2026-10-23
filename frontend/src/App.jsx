@@ -24,7 +24,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { useTelemetry } from './hooks/useTelemetry.js';
-import { withDemoValues } from './demoValues.js';
+import { withDemoValues } from './format.js';
 import { SignalChart, Sparkline } from './components/SignalChart.jsx';
 import { SelectField, SimulationPanel } from './components/Controls.jsx';
 import {
