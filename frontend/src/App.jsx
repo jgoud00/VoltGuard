@@ -24,9 +24,17 @@ import {
   Zap,
 } from 'lucide-react';
 import { useTelemetry } from './hooks/useTelemetry.js';
+import { withDemoValues } from './demoValues.js';
 import { SignalChart, Sparkline } from './components/SignalChart.jsx';
 import { SelectField, SimulationPanel } from './components/Controls.jsx';
-import { fmt, profiles, scenarios, signals, time } from './format.js';
+import {
+  fmt,
+  profiles,
+  scenarios,
+  signals,
+  time,
+  measurementNote,
+} from './format.js';
 
 const metricSpecs = [
   signals[0],
@@ -37,10 +45,12 @@ const metricSpecs = [
     key: 'energy',
     title: 'Energy',
     unit: 'kWh',
-    digits: 4,
+    digits: 8,
     color: '#687360',
     note: 'Accumulated consumption',
   },
+  signals[4],
+  signals[5],
 ];
 const metricIcons = {
   voltage: Zap,
@@ -48,6 +58,8 @@ const metricIcons = {
   power: Gauge,
   temperature: Thermometer,
   energy: Activity,
+  soc: BatteryMedium,
+  soh: ShieldCheck,
 };
 const navItems = [
   { id: 'overview', label: 'Overview', icon: LayoutGrid },
@@ -120,7 +132,6 @@ function exportTelemetry(samples, deviceId) {
     'temperature',
     'soc',
     'soh',
-    'internalResistance',
     'status',
     'source',
   ];
@@ -168,17 +179,20 @@ function Metric({ spec, samples, latest, active, live, onSelect, selected }) {
       </div>
       <div className="metric-bottom">
         <span>
-          {!latest
-            ? 'Awaiting data'
-            : !live
-              ? 'Last received'
-              : abnormal
-                ? 'Outside limit'
-                : spec.key === 'power'
-                  ? 'PF = 1 assumption'
-                  : spec.key === 'energy'
-                    ? 'Accumulated energy'
-                    : 'Latest reading'}
+          {latest?.demoFields?.includes(spec.key) ||
+          latest?.batteryProfile === 'LI_ION_2S'
+            ? measurementNote(latest, spec.key)
+            : !latest
+              ? 'Awaiting data'
+              : !live
+                ? 'Last received'
+                : abnormal
+                  ? 'Outside limit'
+                  : spec.key === 'power'
+                    ? 'PF = 1 assumption'
+                    : spec.key === 'energy'
+                      ? 'Accumulated energy'
+                      : 'Latest reading'}
         </span>
         <Sparkline
           samples={samples}
@@ -209,11 +223,18 @@ function BatteryDetails({ latest }) {
     <section className="battery-details" aria-label="Battery estimates">
       <div>
         <BatteryMedium size={17} />
-        <span>Battery estimates</span>
-        <Help text="State of charge, health and resistance are illustrative estimates until calibrated on hardware." />
+        <span>
+          {latest?.batteryProfile === 'LI_ION_2S'
+            ? 'Battery estimates'
+            : 'Battery estimates'}
+        </span>
+        <Help text="State of charge and battery health require a validated battery model or capacity measurements. They remain unavailable for the physical pack. Simulator estimates are illustrative." />
       </div>
       <div className="battery-estimate">
-        <span>State of charge</span>
+        <span>
+          State of charge
+          {latest?.demoFields?.includes('soc') ? ' · Demo value' : ''}
+        </span>
         <strong>
           {fmt(latest?.soc, 1)}
           <small>%</small>
@@ -223,7 +244,10 @@ function BatteryDetails({ latest }) {
         </div>
       </div>
       <div className="battery-estimate">
-        <span>Health index</span>
+        <span>
+          Battery health (SOH)
+          {latest?.demoFields?.includes('soh') ? ' · Demo value' : ''}
+        </span>
         <strong>
           {fmt(latest?.soh, 1)}
           <small>%</small>
@@ -231,13 +255,6 @@ function BatteryDetails({ latest }) {
         <div className="estimate-track">
           <span style={{ width: `${latest?.soh || 0}%` }} />
         </div>
-      </div>
-      <div className="battery-estimate resistance-estimate">
-        <span>Internal resistance</span>
-        <strong>
-          {fmt(latest?.internalResistance * 1000, 1)}
-          <small>mΩ</small>
-        </strong>
       </div>
     </section>
   );
@@ -331,7 +348,7 @@ function EventLog({ alerts, active }) {
 export default function App() {
   const telemetry = useTelemetry();
   const {
-    samples,
+    samples: measuredSamples,
     alerts,
     active,
     connected,
@@ -341,12 +358,33 @@ export default function App() {
     busy,
     error,
     now,
-    latest,
+    latest: measuredLatest,
     live,
     connection,
     status,
     update,
   } = telemetry;
+  const samples = useMemo(() => {
+    const lastStamp = Date.parse(
+      measuredSamples.at(-1)?.receivedAt || measuredSamples.at(-1)?.timestamp,
+    );
+    return measuredSamples.map((sample) => {
+      const stamp = Date.parse(sample.receivedAt || sample.timestamp);
+      return withDemoValues(
+        sample,
+        Number.isFinite(stamp) && Number.isFinite(lastStamp)
+          ? now - (lastStamp - stamp)
+          : now,
+      );
+    });
+  }, [measuredSamples, now]);
+  const latest = withDemoValues(
+    measuredLatest || {
+      batteryProfile: config.profile,
+      deviceId: device.deviceId || 'voltguard-01',
+    },
+    now,
+  );
   const [nav, setNav] = useState('overview');
   const [mobileNav, setMobileNav] = useState(false);
   const navigationTarget = useRef(null);
@@ -365,19 +403,23 @@ export default function App() {
   const chartSignals = useMemo(
     () =>
       signals.map((signal) =>
-        signal.key === 'current' && !battery
-          ? { ...signal, note: 'Load current' }
-          : signal,
+        profileSamples.some((sample) => sample.demoFields.includes(signal.key))
+          ? { ...signal, note: 'Includes demo values · not measured' }
+          : signal.key === 'current' && !battery
+            ? { ...signal, note: 'Load current' }
+            : signal,
       ),
-    [battery],
+    [battery, profileSamples],
   );
   const selectedSpec =
     chartSignals.find((s) => s.key === selectedSignal) || chartSignals[0];
-  const age = latest
+  const age = measuredLatest
     ? Math.max(
         0,
         Math.floor(
-          (now - Date.parse(latest.receivedAt || latest.timestamp)) / 1000,
+          (now -
+            Date.parse(measuredLatest.receivedAt || measuredLatest.timestamp)) /
+            1000,
         ),
       )
     : null;
@@ -525,12 +567,28 @@ export default function App() {
                   {battery ? 'BATTERY SYSTEM' : 'ELECTRICAL SYSTEM'}
                 </div>
                 <h1>Energy overview</h1>
-                <p>Live measurements, device status, and condition history.</p>
+                <p>
+                  Voltage, current, power, temperature, energy, state of charge,
+                  and battery health. Missing readings use labeled demo values.
+                  {latest.demoFields.length > 0 && (
+                    <span className="demo-mode">
+                      {' '}
+                      Demo values:{' '}
+                      {latest.demoFields
+                        .map(
+                          (key) =>
+                            metricSpecs.find((spec) => spec.key === key)?.title,
+                        )
+                        .join(', ')}
+                      . These are presentation examples.
+                    </span>
+                  )}
+                </p>
               </div>
               <button
                 className="button secondary export-button"
                 disabled={!samples.length}
-                onClick={() => exportTelemetry(samples, deviceId)}
+                onClick={() => exportTelemetry(measuredSamples, deviceId)}
               >
                 <ArrowDownToLine size={15} />
                 Export readings
@@ -728,7 +786,7 @@ export default function App() {
                 <>
                   <BatteryDetails latest={latest} />
                   <div className="battery-charts">
-                    {signals.slice(4).map((spec) => (
+                    {chartSignals.slice(4).map((spec) => (
                       <SignalChart
                         key={spec.key}
                         spec={spec}

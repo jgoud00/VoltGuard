@@ -11,25 +11,29 @@ export function evaluateAlerts(sample) {
   const add = (code, value, threshold, message, severity = 'CRITICAL') =>
     result.push({ code, type: code, value, threshold, message, severity });
   const high =
-    sample.batteryProfile === 'AC230'
-      ? config.voltageHigh
-      : sample.batteryProfile === '6V'
-        ? config.batteryHigh6
-        : config.batteryHigh12;
+    sample.batteryProfile === 'LI_ION_2S'
+      ? config.lithiumHigh2s
+      : sample.batteryProfile === 'AC230'
+        ? config.voltageHigh
+        : sample.batteryProfile === '6V'
+          ? config.batteryHigh6
+          : config.batteryHigh12;
   const low =
-    sample.batteryProfile === 'AC230'
-      ? config.voltageLow
-      : sample.batteryProfile === '6V'
-        ? config.batteryLow6
-        : config.batteryLow12;
-  if (sample.voltage > high)
+    sample.batteryProfile === 'LI_ION_2S'
+      ? config.lithiumLow2s
+      : sample.batteryProfile === 'AC230'
+        ? config.voltageLow
+        : sample.batteryProfile === '6V'
+          ? config.batteryLow6
+          : config.batteryLow12;
+  if (sample.voltage !== null && sample.voltage > high)
     add(
       'OVERVOLTAGE',
       sample.voltage,
       high,
       'Voltage exceeds configured limit',
     );
-  if (sample.voltage < low)
+  if (sample.voltage !== null && sample.voltage < low)
     add('UNDERVOLTAGE', sample.voltage, low, 'Voltage below configured limit');
   if (Math.abs(sample.current) > config.currentHigh)
     add(
@@ -46,14 +50,14 @@ export function evaluateAlerts(sample) {
       'Temperature exceeds configured limit',
     );
   if (sample.batteryProfile !== 'AC230') {
-    if (sample.soc < config.socLow)
+    if (sample.soc !== null && sample.soc < config.socLow)
       add(
         'LOW_BATTERY',
         sample.soc,
         config.socLow,
         'State of charge below 20%',
       );
-    if (sample.soh < config.sohLow)
+    if (sample.soh !== null && sample.soh < config.sohLow)
       add(
         'POOR_HEALTH',
         sample.soh,

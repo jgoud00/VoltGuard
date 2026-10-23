@@ -30,6 +30,8 @@ export const config = {
   batteryLow6: number('VOLTAGE_LOW_6V', 5.5),
   batteryHigh12: number('VOLTAGE_HIGH_12V', 15),
   batteryLow12: number('VOLTAGE_LOW_12V', 11),
+  lithiumHigh2s: number('VOLTAGE_HIGH_LI_ION_2S', 8.4),
+  lithiumLow2s: number('VOLTAGE_LOW_LI_ION_2S', 6),
   socLow: number('SOC_LOW', 20),
   sohLow: number('SOH_LOW', 60),
   temperatureHigh: number('TEMPERATURE_HIGH', 50),

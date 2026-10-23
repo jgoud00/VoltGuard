@@ -1,4 +1,5 @@
 import express from 'express';
+import { deriveNominalEnergy } from './nominalEnergy.js';
 import cors from 'cors';
 import mqtt from 'mqtt';
 import { Aedes } from 'aedes';
@@ -7,10 +8,11 @@ import { createServer } from 'node:http';
 import { WebSocketServer, WebSocket } from 'ws';
 import {
   db,
+  transaction,
+  databaseDriver,
   alerts,
   history,
   latest,
-  prune,
   resolveAlert,
   saveAlert,
   saveTelemetry,
@@ -48,14 +50,21 @@ const broadcast = (packet) => {
       else c.send(data);
     }
 };
+let ingestion = Promise.resolve();
 const ingest = (raw) => {
+  const result = ingestion.then(() => ingestSerial(raw));
+  ingestion = result.catch(() => {});
+  return result;
+};
+const ingestSerial = async (raw) => {
   const s = validateTelemetry(raw);
   s.receivedAt = new Date().toISOString();
-  const previous = latest(s.deviceId);
+  const previous = await latest(s.deviceId);
   if (previous && Date.parse(s.timestamp) <= Date.parse(previous.timestamp)) {
     duplicates++;
     return null;
   }
+  deriveNominalEnergy(s, previous);
   const candidates = evaluateAlerts(s);
   s.status = candidates.some((a) => a.severity === 'CRITICAL')
     ? 'critical'
@@ -63,9 +72,10 @@ const ingest = (raw) => {
       ? 'warning'
       : s.status;
   const events = [];
-  db.transaction(() => {
-    s.id = Number(saveTelemetry(s));
-    const active = alerts(s.deviceId, 5000).filter((a) => a.active);
+  await transaction(async () => {
+    events.length = 0; // MongoDB may retry a transaction after a transient conflict.
+    s.id = Number(await saveTelemetry(s));
+    const active = (await alerts(s.deviceId, 5000)).filter((a) => a.active);
     for (const a of candidates)
       if (!active.some((old) => old.code === a.code)) {
         const event = {
@@ -74,18 +84,30 @@ const ingest = (raw) => {
           timestamp: s.receivedAt,
           active: true,
         };
-        event.id = Number(saveAlert(event));
+        event.id = Number(await saveAlert(event));
         events.push({ type: 'alert', data: event });
       }
+    const alertMeasurement = {
+      OVERVOLTAGE: 'voltage',
+      UNDERVOLTAGE: 'voltage',
+      OVERCURRENT: 'current',
+      HIGH_TEMPERATURE: 'temperature',
+      LOW_BATTERY: 'soc',
+      POOR_HEALTH: 'soh',
+    };
     for (const a of active)
-      if (!candidates.some((c) => c.code === a.code)) {
-        resolveAlert(a.id, s.receivedAt);
+      if (
+        !candidates.some((c) => c.code === a.code) &&
+        (!alertMeasurement[a.code] ||
+          Number.isFinite(s[alertMeasurement[a.code]]))
+      ) {
+        await resolveAlert(a.id, s.receivedAt);
         events.push({
           type: 'alert',
           data: { ...a, active: false, resolvedAt: s.receivedAt },
         });
       }
-  })();
+  });
   dbHealthy = true;
   broadcast({ type: 'telemetry', data: s });
   for (const e of events) {
@@ -94,7 +116,8 @@ const ingest = (raw) => {
     );
     broadcast(e);
   }
-  if (++count % 1000 === 0) prune();
+  // Preserve historical records during physical logging; retention is explicit maintenance.
+  count++;
   return s;
 };
 const device = (req) =>
@@ -126,16 +149,17 @@ app.get('/api/health', (_req, res) =>
     websocket: 'running',
     websocketClients: wss.clients.size,
     database: dbHealthy ? 'ok' : 'unavailable',
+    databaseDriver,
     accepted: count,
     rejected,
     duplicates,
     memoryBytes: process.memoryUsage().heapUsed,
   }),
 );
-app.get(['/api/latest', '/api/telemetry/latest'], (req, res) =>
-  res.json(latest(device(req)) || null),
+app.get(['/api/latest', '/api/telemetry/latest'], async (req, res) =>
+  res.json((await latest(device(req))) || null),
 );
-app.get(['/api/history', '/api/telemetry/history'], (req, res) => {
+app.get(['/api/history', '/api/telemetry/history'], async (req, res) => {
   const from = req.query.from || req.query.start,
     to = req.query.to || req.query.end;
   for (const v of [from, to])
@@ -147,7 +171,7 @@ app.get(['/api/history', '/api/telemetry/history'], (req, res) => {
   if (from && to && Date.parse(from) > Date.parse(to))
     return res.status(400).json({ error: 'from must precede to' });
   res.json(
-    history(
+    await history(
       device(req),
       limit(req.query.limit),
       from ? new Date(from).toISOString() : undefined,
@@ -155,15 +179,15 @@ app.get(['/api/history', '/api/telemetry/history'], (req, res) => {
     ),
   );
 });
-app.get('/api/alerts', (req, res) =>
-  res.json(alerts(device(req), limit(req.query.limit, 30))),
+app.get('/api/alerts', async (req, res) =>
+  res.json(await alerts(device(req), limit(req.query.limit, 30))),
 );
-app.get('/api/device', (req, res) => {
-  const s = latest(device(req));
+app.get('/api/device', async (req, res) => {
+  const s = await latest(device(req));
   res.json({
     deviceId: device(req),
     mode,
-    profile,
+    profile: s?.batteryProfile || profile,
     profiles: PROFILES,
     modes: MODES,
     simulated: s?.source === 'simulation',
@@ -191,7 +215,9 @@ const simulationAuth = (req, res, next) => {
 app.post('/api/simulator/mode', simulationAuth, (req, res) => {
   if (
     !MODES.includes(req.body?.mode) ||
-    (req.body.profile && !PROFILES.includes(req.body.profile))
+    (req.body.profile &&
+      (!PROFILES.includes(req.body.profile) ||
+        req.body.profile === 'LI_ION_2S'))
   )
     return res.status(400).json({ error: 'Invalid mode or profile' });
   mode = req.body.mode;
@@ -202,11 +228,16 @@ app.post('/api/simulator/mode', simulationAuth, (req, res) => {
 app.get('/api/simulator/config', simulationAuth, (_req, res) =>
   res.json({ mode, profile }),
 );
-app.post('/api/simulator/telemetry', simulationAuth, (req, res) => {
+app.post('/api/simulator/telemetry', simulationAuth, async (req, res) => {
   try {
-    res.json({ accepted: !!ingest({ ...req.body, source: 'simulation' }) });
+    res.json({
+      accepted: !!(await ingest({ ...req.body, source: 'simulation' })),
+    });
   } catch (error) {
-    if (error.code?.startsWith('SQLITE')) {
+    if (
+      error.code?.toString().startsWith('SQLITE') ||
+      error.name?.startsWith('Mongo')
+    ) {
       dbHealthy = false;
       throw error;
     }
@@ -214,7 +245,11 @@ app.post('/api/simulator/telemetry', simulationAuth, (req, res) => {
   }
 });
 app.use((error, _req, res, _next) => {
-  if (error.code?.startsWith('SQLITE')) dbHealthy = false;
+  if (
+    error.code?.toString().startsWith('SQLITE') ||
+    error.name?.startsWith('Mongo')
+  )
+    dbHealthy = false;
   console.warn('[API] Request failed:', error.code || error.message);
   res.status(error.status || 503).json({
     error: error.status === 400 ? 'Invalid request' : 'Service unavailable',
@@ -276,7 +311,7 @@ client.on('close', () => {
   mqttReady = false;
 });
 client.on('error', (e) => console.warn('[MQTT]', e.code || 'Connection error'));
-client.on('message', (topic, payload) => {
+client.on('message', async (topic, payload) => {
   try {
     if (payload.length > 16384) throw new Error('Payload too large');
     const raw = JSON.parse(payload.toString());
@@ -287,10 +322,11 @@ client.on('message', (topic, payload) => {
       ].includes(topic)
     )
       throw new Error('Topic/device mismatch');
-    ingest(raw);
+    await ingest(raw);
   } catch (e) {
     rejected++;
-    if (e.code?.startsWith('SQLITE')) dbHealthy = false;
+    if (e.code?.toString().startsWith('SQLITE') || e.name?.startsWith('Mongo'))
+      dbHealthy = false;
     console.warn('[MQTT] Rejected:', e.code || e.message);
   }
 });
@@ -312,7 +348,8 @@ async function shutdown() {
     await new Promise((r) => broker.close(r));
     brokerServer.close();
   }
-  db.close();
+  await ingestion;
+  await db.close();
   clearTimeout(deadline);
 }
 process.on('SIGINT', shutdown);

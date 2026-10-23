@@ -1,5 +1,7 @@
 # Hardware integration
 
+For the confirmed GPIO34/GPIO35/GPIO4 two-cell lithium-ion hardware, use the [physical ESP32 integration](ESP32_INTEGRATION.md) and nullable `LI_ION_2S` contract. The lead-acid example below is a separate legacy/simulator contract; its estimates do not apply to this pack.
+
 Use the existing MQTT boundary. For physical ESP32 testing, stop the simulator, run `npm run dev:hardware`, set `SIMULATION_ENABLED=false`, and configure an authenticated LAN broker. Set `EMBEDDED_BROKER=false` and `MQTT_URL=mqtt://<LAN broker IP>:1883`; put optional credentials in the root environment. Configure the ESP32 for that same broker and credentials. The default loopback listener is inaccessible from an ESP32.
 
 Publish QoS 1 at approximately one-second intervals to `voltguard/device/voltguard-01/telemetry` (also accepted: `voltguard/voltguard-01/telemetry`). IDs must match topic and payload. The dashboard defaults to `DEVICE_ID` on the server.

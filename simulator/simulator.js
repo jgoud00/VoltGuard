@@ -33,6 +33,7 @@ const rate = Number(option('rate', 1)),
 if (
   !MODES.includes(mode) ||
   !PROFILES.includes(profile) ||
+  profile === 'LI_ION_2S' ||
   !validDevice(deviceId) ||
   !Number.isFinite(rate) ||
   rate <= 0 ||
@@ -75,7 +76,8 @@ async function tick() {
       if (r.ok) {
         const c = await r.json();
         if (MODES.includes(c.mode)) mode = c.mode;
-        if (PROFILES.includes(c.profile)) profile = c.profile;
+        if (PROFILES.includes(c.profile) && c.profile !== 'LI_ION_2S')
+          profile = c.profile;
       }
     } catch {}
   const now = Date.now(),

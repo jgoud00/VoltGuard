@@ -1,0 +1,77 @@
+{
+  "file": "docs\\evidence\\adc\\compare-2.log",
+  "mqtt_publish_lines": 6,
+  "boot_lines": 0,
+  "first_conversion": {
+    "n": 256,
+    "min_mV": 1291,
+    "max_mV": 1351,
+    "mean_mV": 1319.33203125,
+    "sample_sd_mV": 8.11794848607387,
+    "span_mV": 60,
+    "percentiles_mV": {
+      "1": 1296.65,
+      "5": 1309.0,
+      "25": 1314.0,
+      "50": 1318.0,
+      "75": 1326.0,
+      "95": 1331.5,
+      "99": 1340.35
+    },
+    "consecutive_32_sample_means_mV": [
+      1319.03125,
+      1320.4375,
+      1320.0625,
+      1320.46875,
+      1320.53125,
+      1318.21875,
+      1319,
+      1316.90625
+    ],
+    "block_mean_span_mV": 3.625,
+    "samples_more_than_15mV_from_median": 17,
+    "max_consecutive_step_mV": 36,
+    "elapsed_ms": 1318,
+    "maximum_gap_ms": 35,
+    "specified_point_span_rule_passes": false
+  },
+  "discard_first_conversion": {
+    "n": 256,
+    "min_mV": 1297,
+    "max_mV": 1358,
+    "mean_mV": 1319.22265625,
+    "sample_sd_mV": 7.378375556844686,
+    "span_mV": 61,
+    "percentiles_mV": {
+      "1": 1303.55,
+      "5": 1308.0,
+      "25": 1314.0,
+      "50": 1318.0,
+      "75": 1326.0,
+      "95": 1330.0,
+      "99": 1337.0
+    },
+    "consecutive_32_sample_means_mV": [
+      1318.65625,
+      1321.1875,
+      1319.53125,
+      1319.5625,
+      1320.875,
+      1318.96875,
+      1315.96875,
+      1319.03125
+    ],
+    "block_mean_span_mV": 5.21875,
+    "samples_more_than_15mV_from_median": 8,
+    "max_consecutive_step_mV": 34,
+    "elapsed_ms": 1318,
+    "maximum_gap_ms": 35,
+    "specified_point_span_rule_passes": false
+  },
+  "paired_difference_mV": {
+    "mean": -0.109375,
+    "sd": 9.472962039611557,
+    "mean_AB_order": -0.0390625,
+    "mean_BA_order": -0.1796875
+  }
+}

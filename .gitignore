@@ -2,5 +2,13 @@ node_modules/
 dist/
 .env
 backend/data/*.sqlite*
+backend/data/mongodb/
 test-results/
 playwright-report/
+firmware/voltguard_esp32/secrets.h
+firmware/build/
+firmware/**/build/
+firmware/**/build-*/
+firmware/**/*.bin
+firmware/**/*.elf
+firmware/**/*.map

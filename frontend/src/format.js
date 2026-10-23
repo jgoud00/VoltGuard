@@ -15,10 +15,43 @@ export const time = (stamp) =>
       })
     : '—';
 export const profiles = {
+  LI_ION_2S: '2-cell lithium-ion',
   '6V': '6 V lead-acid',
   '12V': '12 V lead-acid',
   AC230: '230 V electrical',
 };
+export function measurementNote(sample, key) {
+  if (sample?.demoFields?.includes(key)) return 'Demo value · not measured';
+  if (
+    ['power', 'energy'].includes(key) &&
+    sample?.quality?.current === 'calibrated_limited'
+  )
+    return key === 'energy'
+      ? 'Stored discharge estimate · gaps excluded'
+      : 'V × nominal I · noise-limited';
+  if (key === 'current' && sample?.quality?.current === 'calibrated_limited')
+    return 'Nominal current · noise-limited';
+  if (!sample) return 'Awaiting data';
+  if (
+    key === 'energy' &&
+    sample.quality?.energy === 'nominal_discharge_partial'
+  )
+    return 'Stored discharge estimate · gaps excluded';
+  if (['soc', 'soh'].includes(key) && !Number.isFinite(sample[key]))
+    return 'Unavailable · battery characterization required';
+  if (key === 'current' && sample.quality?.current === 'uncalibrated')
+    return 'Unavailable · calibration required';
+  if (key === 'current' && sample.quality?.current === 'below_resolution')
+    return 'Unavailable · below reliable resolution';
+  if (key === 'temperature' && sample.quality?.temperature === 'disconnected')
+    return 'Unavailable · probe disconnected';
+  if (!Number.isFinite(sample[key])) return 'Unavailable · not measured';
+  if (sample.quality?.[key] === 'calibrated_limited')
+    return 'Nominal sensitivity · small currents unreliable';
+  if (sample.quality?.[key] === 'averaged_unverified')
+    return 'Averaged ADC · accuracy unverified';
+  return 'Latest reading';
+}
 export const scenarios = {
   NORMAL: 'Normal operation',
   LOW_BATTERY: 'Low battery',
@@ -55,7 +88,7 @@ export const signals = [
     unit: 'W',
     digits: 2,
     color: '#496783',
-    note: 'PF = 1 assumption',
+    note: 'Derived from voltage and current',
   },
   {
     key: 'temperature',
@@ -71,14 +104,14 @@ export const signals = [
     unit: '%',
     digits: 1,
     color: '#296653',
-    note: 'Illustrative battery estimate',
+    note: 'State of charge · battery model required',
   },
   {
     key: 'soh',
-    title: 'Health index',
+    title: 'Battery health (SOH)',
     unit: '%',
     digits: 1,
     color: '#686d7e',
-    note: 'Illustrative health estimate',
+    note: 'State of health · capacity assessment required',
   },
 ];

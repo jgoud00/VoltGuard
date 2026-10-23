@@ -9,7 +9,7 @@ import {
   Tooltip,
   Filler,
 } from 'chart.js';
-import { fmt, time } from '../format.js';
+import { fmt, time, measurementNote } from '../format.js';
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -19,11 +19,9 @@ ChartJS.register(
   Filler,
 );
 export function Sparkline({ samples, metric, color = '#296653' }) {
-  const points = samples
-    .slice(-30)
-    .map((s) => s[metric])
-    .filter(Number.isFinite);
-  if (points.length < 2)
+  const points = samples.slice(-30).map((s) => s[metric]);
+  const available = points.filter(Number.isFinite);
+  if (available.length < 2)
     return (
       <svg className="sparkline" viewBox="0 0 100 28" aria-hidden="true">
         <path
@@ -34,12 +32,13 @@ export function Sparkline({ samples, metric, color = '#296653' }) {
         />
       </svg>
     );
-  const min = Math.min(...points),
-    span = Math.max(...points) - min;
+  const min = Math.min(...available),
+    span = Math.max(...available) - min;
   const path = points
-    .map(
-      (v, i) =>
-        `${i ? 'L' : 'M'}${((i / (points.length - 1)) * 100).toFixed(2)} ${(span ? 23 - ((v - min) / span) * 18 : 14).toFixed(2)}`,
+    .map((v, i) =>
+      Number.isFinite(v)
+        ? `${i && Number.isFinite(points[i - 1]) ? 'L' : 'M'}${((i / (points.length - 1)) * 100).toFixed(2)} ${(span ? 23 - ((v - min) / span) * 18 : 14).toFixed(2)}`
+        : '',
     )
     .join(' ');
   return (
@@ -194,8 +193,14 @@ export const SignalChart = memo(function SignalChart({
         />
         {!points.length && (
           <div className="chart-empty">
-            Waiting for the first reading
-            <span>The signal will appear when the device transmits.</span>
+            {samples.at(-1)?.batteryProfile === 'LI_ION_2S'
+              ? measurementNote(samples.at(-1), spec.key)
+              : 'Waiting for the first reading'}
+            <span>
+              {samples.at(-1)?.batteryProfile === 'LI_ION_2S'
+                ? 'Missing measurements are shown as gaps, never zero.'
+                : 'The signal will appear when the device transmits.'}
+            </span>
           </div>
         )}
       </div>

@@ -92,7 +92,9 @@ export function SimulationPanel({ config, busy, enabled, error, onChange }) {
             <SelectField
               label="Monitoring profile"
               value={config.profile}
-              options={profiles}
+              options={Object.fromEntries(
+                Object.entries(profiles).filter(([key]) => key !== 'LI_ION_2S'),
+              )}
               disabled={busy}
               onChange={(profile) => onChange({ profile })}
             />

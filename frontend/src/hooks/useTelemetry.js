@@ -29,7 +29,8 @@ export function useTelemetry() {
   useEffect(() => {
     let alive = true,
       socket,
-      retry;
+      retry,
+      deviceId;
     const controller = new AbortController();
     const request = async (path) => {
       const response = await fetch(API + path, {
@@ -48,18 +49,23 @@ export function useTelemetry() {
     };
     const load = async () => {
       try {
-        const [history, events, next] = await Promise.all([
-          request('/api/history?limit=100'),
-          request('/api/alerts'),
-          request('/api/device'),
+        const next = await request('/api/device');
+        if (!alive) return;
+        deviceId = next.deviceId;
+        const query = `deviceId=${encodeURIComponent(deviceId)}`;
+        const [history, events] = await Promise.all([
+          request(`/api/history?limit=100&${query}`),
+          request(`/api/alerts?${query}`),
         ]);
         if (!alive) return;
         setSamples((current) => merge(history, current));
-        setAlerts((current) =>
-          [...new Map([...events, ...current].map((a) => [a.id, a])).values()]
-            .sort((a, b) => b.id - a.id)
-            .slice(0, 30),
-        );
+        setAlerts((current) => {
+          const merged = new Map([...events, ...current].map((a) => [a.id, a]));
+          // Recovery is final for an event ID, including during a REST/socket race.
+          for (const event of events)
+            if (!event.active) merged.set(event.id, event);
+          return [...merged.values()].sort((a, b) => b.id - a.id).slice(0, 30);
+        });
         setDevice(next);
         setConfig({ mode: next.mode, profile: next.profile });
         setError('');
@@ -83,6 +89,11 @@ export function useTelemetry() {
         if (!alive) return;
         try {
           const packet = JSON.parse(event.data);
+          if (
+            ['telemetry', 'alert'].includes(packet.type) &&
+            (!deviceId || packet.data?.deviceId !== deviceId)
+          )
+            return;
           if (packet.type === 'telemetry') {
             validateTelemetry(packet.data);
             setSamples((current) => merge(current, [packet.data]));

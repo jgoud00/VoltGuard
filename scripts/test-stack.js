@@ -11,7 +11,7 @@ export async function until(fn, ms = 10000) {
   }
   throw new Error('Condition timed out');
 }
-export async function stack(port = 3301, mqttPort = 18883) {
+export async function stack(port = 3301, mqttPort = 18883, overrides = {}) {
   const env = {
     ...process.env,
     PORT: String(port),
@@ -19,7 +19,17 @@ export async function stack(port = 3301, mqttPort = 18883) {
     MQTT_URL: `mqtt://127.0.0.1:${mqttPort}`,
     API_URL: `http://127.0.0.1:${port}`,
     DB_PATH: ':memory:',
+    DATABASE_DRIVER: 'sqlite',
+    HOST: '127.0.0.1',
+    MQTT_HOST: '127.0.0.1',
+    MQTT_USERNAME: '',
+    MQTT_PASSWORD: '',
+    EMBEDDED_BROKER: 'true',
+    SIMULATION_ENABLED: 'true',
+    SIMULATOR_TOKEN: '',
+    BATTERY_PROFILE: '12V',
     DEVICE_OFFLINE_MS: '1000',
+    ...overrides,
   };
   const processes = [];
   const start = (file, args = []) => {

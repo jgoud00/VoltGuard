@@ -18,7 +18,11 @@ test(
       PORT: '3303',
       MQTT_URL: 'mqtt://127.0.0.1:18885',
       EMBEDDED_BROKER: 'false',
+      HOST: '127.0.0.1',
+      MQTT_USERNAME: '',
+      MQTT_PASSWORD: '',
       DB_PATH: join(dir, 'test.sqlite'),
+      DATABASE_DRIVER: 'sqlite',
     };
     let broker, listener, child, client;
     const startBroker = async () => {

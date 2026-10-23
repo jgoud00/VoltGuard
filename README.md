@@ -2,7 +2,9 @@
 
 VoltGuard is a locally runnable IoT monitoring demonstrator. It preserves the existing 6V/12V lead-acid battery features and adds an **AC230 electrical software demonstration**. Default data is simulated. Software alerts do not physically disconnect a load.
 
-Sensors ? ESP32 ? MQTT ? Express validation ? SQLite + alert engine ? WebSocket/REST ? React/Chart.js dashboard.
+Physical ESP32 support includes the `LI_ION_2S` profile. See [ESP32 firmware and verified integration](docs/ESP32_INTEGRATION.md). Missing sensors and uncalibrated current remain `null`; stored SoC, SoH and resistance remain unknown. Backend power and cumulative discharge energy are explicitly nominal, noise-limited estimates. Dashboard charge/health previews are separate from stored telemetry. [MongoDB setup and migration](docs/MONGODB.md) describes the active database and preserved SQLite backup.
+
+Sensors → ESP32 → MQTT → Express validation → MongoDB + alert engine → WebSocket/REST → React/Chart.js dashboard.
 
 ## Requirements and installation
 
@@ -13,7 +15,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173. This starts backend, embedded loopback MQTT broker, simulator and frontend. SQLite is created at `backend/data/voltguard.sqlite`. Stop with Ctrl+C. No external services are required after installation. If MQTT port 1883 is occupied, inspect the existing service or choose a free port with matching `MQTT_PORT` and `MQTT_URL`.
+Start local MongoDB first (`powershell -File scripts/start-mongodb.ps1` on the configured Windows computer), then open http://localhost:5173. The application starts backend, embedded loopback MQTT broker, simulator and frontend. MongoDB stores data locally; see [setup](docs/MONGODB.md). Stop the application with Ctrl+C. If MQTT port 1883 is occupied, inspect the existing service or choose a free port with matching `MQTT_PORT` and `MQTT_URL`.
 
 To run components separately:
 
@@ -37,7 +39,7 @@ Copy `.env.example` to `.env`. Backend/simulator read it at startup; restart aft
 | API_URL, VITE_API_URL                           | Simulator and browser API origins respectively                                                                                    |
 | CORS_ORIGINS                                    | Comma-separated allowed browser origins; also checked for WebSocket and simulation writes                                         |
 | DEVICE_ID                                       | Default REST/dashboard device and simulator identity                                                                              |
-| BATTERY_PROFILE                                 | `6V`, `12V` (default), or `AC230`                                                                                                 |
+| BATTERY_PROFILE                                 | `6V`, `12V` (default), `AC230`, or hardware-only `LI_ION_2S`                                                                      |
 | SIM_MODE, SIMULATION_ENABLED                    | Initial scenario; simulator API enable switch                                                                                     |
 | SIMULATOR_TOKEN                                 | Optional bearer token required for simulator APIs; CLI sends it. Browser controls do not embed this secret                        |
 | DB_PATH                                         | Root-relative or absolute SQLite path; `:memory:` used by isolated tests                                                          |
@@ -103,7 +105,7 @@ Data routes accept `deviceId` or `device`. History accepts `from`/`to` or `start
 
 WebSocket `/ws` sends `{ "type": "telemetry" | "alert" | "simulation", "data": ... }`. Alert updates retain an ID when resolved. Repeated abnormal readings create one alert per continuously active condition; recovery clears it immediately and a later threshold crossing creates a new event. Clients reconnect and reload history. Dashboard shows LIVE, RECONNECTING, OFFLINE or awaiting data, plus simulation source and last receipt. Chart history is capped at 100; points from differing profiles are not mixed. Backend heartbeat removes dead sockets and disconnects slow clients with excessive queued bytes.
 
-Telemetry retention is pruned to 100,000 rows every 1,000 accepted readings; inactive alert history is capped at 5,000. Active alerts remain available. SQLite schema upgrades preserve existing rows.
+Automatic telemetry/alert pruning is disabled to preserve historical records during physical logging. MongoDB stores new readings; the SQLite migration source and backup are retained. Plan explicit maintenance if long-term storage grows large.
 
 ## Testing and quality checks
 

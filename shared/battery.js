@@ -40,19 +40,3 @@ function interpolate(value, pairs) {
 }
 export const ocvFromSoc = (soc, profile) =>
   interpolate(clamp(soc), profiles[profile].ocv);
-export const socFromOcv = (voltage, profile) =>
-  clamp(
-    interpolate(
-      voltage,
-      profiles[profile].ocv.map(([soc, v]) => [v, soc]),
-    ),
-  );
-export const coulombCount = (soc, current, elapsedHours, capacityAh) => {
-  if (capacityAh <= 0 || elapsedHours < 0)
-    throw new Error('Invalid capacity or elapsed time');
-  return clamp(soc - ((current * elapsedHours) / capacityAh) * 100);
-};
-export const healthIndex = (resistance, rFresh, rEol) => {
-  if (rEol <= rFresh) throw new Error('R_EOL must exceed R_FRESH');
-  return clamp((100 * (rEol - resistance)) / (rEol - rFresh));
-};

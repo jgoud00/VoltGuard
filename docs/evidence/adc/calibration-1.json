@@ -1,0 +1,39 @@
+{
+  "file": "docs\\evidence\\adc\\calibration-1.log",
+  "mqtt_publish_lines": 6,
+  "boot_lines": 0,
+  "acquisition": "single raw conversion",
+  "calibration": {
+    "n": 256,
+    "min_mV": 1289.0,
+    "max_mV": 1341.0,
+    "mean_mV": 1318.80078125,
+    "sample_sd_mV": 7.032373276288655,
+    "span_mV": 52.0,
+    "percentiles_mV": {
+      "1": 1299.55,
+      "5": 1307.75,
+      "25": 1314.0,
+      "50": 1318.0,
+      "75": 1325.0,
+      "95": 1328.0,
+      "99": 1335.45
+    },
+    "consecutive_32_sample_means_mV": [
+      1319.5625,
+      1317.96875,
+      1316.625,
+      1318.65625,
+      1319.4375,
+      1319.15625,
+      1318.84375,
+      1320.15625
+    ],
+    "block_mean_span_mV": 3.53125,
+    "samples_more_than_15mV_from_median": 10,
+    "max_consecutive_step_mV": 27.0,
+    "elapsed_ms": 1374,
+    "maximum_gap_ms": 43,
+    "specified_point_span_rule_passes": false
+  }
+}

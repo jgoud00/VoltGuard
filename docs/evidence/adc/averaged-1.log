@@ -1,0 +1,331 @@
+﻿V=8.145 V, currentADC=1319.55 mV, I=null A (uncalibrated), T=30.44 C (measured), MQTT=published, calibration=NEVER_STARTED samples=0/256 uptime_ms=18510
+[HOST] CALIBRATE_CURRENT_AVERAGED DISCONNECTED at 2026-10-06T14:55:29.3256221Z
+Explicit disconnected-path calibration started (256 points). Keep sensor powered; current path MUST be disconnected.
+[CAL] event=started result=SAMPLING active=yes calibrated=no samples=0/256 elapsed_ms=0 max_sample_gap_ms=0 uptime_ms=18541
+[CAL] min_mV=null max_mV=null mean_mV=null span_mV=null
+[CAL] rejection_thresholds: reject mean<=100.000 mV; reject mean>=3000.000 mV; reject span>30.000 mV; required_samples=256
+[CAL] acquisition=nonoverlapping_32_sample_mean; acceptance_span_applies_to=32_sample_means
+V=8.142 V, currentADC=1319.29 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=5/256 uptime_ms=19529
+V=8.141 V, currentADC=1319.44 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=11/256 uptime_ms=20548
+V=8.142 V, currentADC=1319.24 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=18/256 uptime_ms=21567
+V=8.144 V, currentADC=1319.31 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=24/256 uptime_ms=22586
+V=8.143 V, currentADC=1319.51 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=30/256 uptime_ms=23605
+V=8.145 V, currentADC=1319.02 mV, I=null A (uncalibrated), T=30.56 C (measured), MQTT=published, calibration=SAMPLING samples=36/256 uptime_ms=24624
+V=8.143 V, currentADC=1319.56 mV, I=null A (uncalibrated), T=30.44 C (measured), MQTT=published, calibration=SAMPLING samples=42/256 uptime_ms=25643
+V=8.145 V, currentADC=1320.35 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=48/256 uptime_ms=26662
+V=8.145 V, currentADC=1319.67 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=54/256 uptime_ms=27681
+V=8.143 V, currentADC=1318.65 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=60/256 uptime_ms=28700
+[CAL] event=progress result=SAMPLING active=yes calibrated=no samples=64/256 elapsed_ms=10658 max_sample_gap_ms=35 uptime_ms=29199
+[CAL] min_mV=1315.781 max_mV=1322.188 mean_mV=1319.375 span_mV=6.406
+[CAL] rejection_thresholds: reject mean<=100.000 mV; reject mean>=3000.000 mV; reject span>30.000 mV; required_samples=256
+[CAL] acquisition=nonoverlapping_32_sample_mean; acceptance_span_applies_to=32_sample_means
+[CAL] underlying_raw_count=2048 raw_min_mV=1290 raw_max_mV=1351 raw_mean_mV=1319.375 raw_sd_mV=6.597 raw_span_mV=61 rail_samples=0
+V=8.145 V, currentADC=1318.80 mV, I=null A (uncalibrated), T=30.44 C (measured), MQTT=published, calibration=SAMPLING samples=66/256 uptime_ms=29719
+V=8.141 V, currentADC=1318.62 mV, I=null A (uncalibrated), T=30.44 C (measured), MQTT=published, calibration=SAMPLING samples=72/256 uptime_ms=30738
+V=8.145 V, currentADC=1318.70 mV, I=null A (uncalibrated), T=30.44 C (measured), MQTT=published, calibration=SAMPLING samples=79/256 uptime_ms=31757
+V=8.144 V, currentADC=1319.11 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=85/256 uptime_ms=32776
+V=8.144 V, currentADC=1319.97 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=91/256 uptime_ms=33795
+V=8.145 V, currentADC=1319.09 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=97/256 uptime_ms=34814
+V=8.143 V, currentADC=1318.73 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=103/256 uptime_ms=35833
+V=8.144 V, currentADC=1319.56 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=109/256 uptime_ms=36852
+V=8.142 V, currentADC=1318.88 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=115/256 uptime_ms=37871
+V=8.142 V, currentADC=1318.70 mV, I=null A (uncalibrated), T=30.44 C (measured), MQTT=published, calibration=SAMPLING samples=121/256 uptime_ms=38890
+[CAL] event=progress result=SAMPLING active=yes calibrated=no samples=128/256 elapsed_ms=21337 max_sample_gap_ms=46 uptime_ms=39878
+[CAL] min_mV=1315.781 max_mV=1322.188 mean_mV=1319.169 span_mV=6.406
+[CAL] rejection_thresholds: reject mean<=100.000 mV; reject mean>=3000.000 mV; reject span>30.000 mV; required_samples=256
+[CAL] acquisition=nonoverlapping_32_sample_mean; acceptance_span_applies_to=32_sample_means
+[CAL] underlying_raw_count=4096 raw_min_mV=1287 raw_max_mV=1351 raw_mean_mV=1319.169 raw_sd_mV=6.632 raw_span_mV=64 rail_samples=0
+V=8.145 V, currentADC=1318.23 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=128/256 uptime_ms=39943
+V=8.144 V, currentADC=1319.66 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=134/256 uptime_ms=40962
+V=8.146 V, currentADC=1320.20 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=140/256 uptime_ms=41981
+V=8.147 V, currentADC=1319.01 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=146/256 uptime_ms=43000
+V=8.145 V, currentADC=1318.85 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=152/256 uptime_ms=44019
+V=8.146 V, currentADC=1319.12 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=158/256 uptime_ms=45038
+V=8.145 V, currentADC=1319.27 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=164/256 uptime_ms=46057
+V=8.143 V, currentADC=1319.08 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=170/256 uptime_ms=47076
+V=8.145 V, currentADC=1318.25 mV, I=null A (uncalibrated), T=30.44 C (measured), MQTT=published, calibration=SAMPLING samples=177/256 uptime_ms=48095
+V=8.147 V, currentADC=1318.93 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=183/256 uptime_ms=49114
+V=8.145 V, currentADC=1318.94 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=189/256 uptime_ms=50133
+[CAL] event=progress result=SAMPLING active=yes calibrated=no samples=192/256 elapsed_ms=32041 max_sample_gap_ms=78 uptime_ms=50582
+[CAL] min_mV=1315.781 max_mV=1322.188 mean_mV=1319.172 span_mV=6.406
+[CAL] rejection_thresholds: reject mean<=100.000 mV; reject mean>=3000.000 mV; reject span>30.000 mV; required_samples=256
+[CAL] acquisition=nonoverlapping_32_sample_mean; acceptance_span_applies_to=32_sample_means
+[CAL] underlying_raw_count=6144 raw_min_mV=1287 raw_max_mV=1351 raw_mean_mV=1319.172 raw_sd_mV=6.609 raw_span_mV=64 rail_samples=0
+V=8.144 V, currentADC=1320.15 mV, I=null A (uncalibrated), T=30.44 C (measured), MQTT=published, calibration=SAMPLING samples=195/256 uptime_ms=51152
+V=8.146 V, currentADC=1319.40 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=201/256 uptime_ms=52171
+V=8.144 V, currentADC=1318.57 mV, I=null A (uncalibrated), T=30.44 C (measured), MQTT=published, calibration=SAMPLING samples=207/256 uptime_ms=53190
+V=8.145 V, currentADC=1318.90 mV, I=null A (uncalibrated), T=30.44 C (measured), MQTT=published, calibration=SAMPLING samples=213/256 uptime_ms=54209
+V=8.144 V, currentADC=1318.59 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=219/256 uptime_ms=55228
+V=8.142 V, currentADC=1318.17 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=225/256 uptime_ms=56247
+V=8.142 V, currentADC=1318.11 mV, I=null A (uncalibrated), T=30.44 C (measured), MQTT=published, calibration=SAMPLING samples=231/256 uptime_ms=57266
+V=8.141 V, currentADC=1319.21 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=238/256 uptime_ms=58285
+V=8.144 V, currentADC=1319.37 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=244/256 uptime_ms=59304
+V=8.145 V, currentADC=1318.34 mV, I=null A (uncalibrated), T=30.50 C (measured), MQTT=published, calibration=SAMPLING samples=250/256 uptime_ms=60323
+Session zero=1319.09 mV, observed span=8.12 mV. Nominal sensitivity only; delta below 128.00 mV remains null. Reconnect load only AFTER calibration completes.
+[CAL] event=completed result=ACCEPTED active=no calibrated=yes samples=256/256 elapsed_ms=42720 max_sample_gap_ms=78 uptime_ms=61273
+[CAL] min_mV=1315.781 max_mV=1323.906 mean_mV=1319.092 span_mV=8.125
+[CAL] rejection_thresholds: reject mean<=100.000 mV; reject mean>=3000.000 mV; reject span>30.000 mV; required_samples=256
+[CAL] acquisition=nonoverlapping_32_sample_mean; acceptance_span_applies_to=32_sample_means
+[CAL] underlying_raw_count=8192 raw_min_mV=1287 raw_max_mV=1351 raw_mean_mV=1319.092 raw_sd_mV=6.714 raw_span_mV=64 rail_samples=0
+[CAL] session_zero_mV=1319.092 minimum_current_delta_mV=128.000 (RAM only)
+[RAW_CAL] i=0 t_ms=18730 mv=1320.15625
+V=8.147 V, currentADC=1319.29 mV, I=null A (below_resolution), T=30.50 C (measured), MQTT=published, calibration=ACCEPTED samples=256/256 uptime_ms=61342
+[RAW_CAL] i=1 t_ms=18890 mv=1319.15625
+[RAW_CAL] i=2 t_ms=19050 mv=1320.50000
+[RAW_CAL] i=3 t_ms=19210 mv=1318.81250
+[RAW_CAL] i=4 t_ms=19378 mv=1319.21875
+[RAW_CAL] i=5 t_ms=19568 mv=1317.65625
+[RAW_CAL] i=6 t_ms=19728 mv=1319.03125
+[RAW_CAL] i=7 t_ms=19888 mv=1319.18750
+[RAW_CAL] i=8 t_ms=20048 mv=1319.93750
+[RAW_CAL] i=9 t_ms=20208 mv=1319.00000
+[RAW_CAL] i=10 t_ms=20377 mv=1322.18750
+[RAW_CAL] i=11 t_ms=20567 mv=1318.06250
+[RAW_CAL] i=12 t_ms=20727 mv=1318.37500
+[RAW_CAL] i=13 t_ms=20887 mv=1319.62500
+[RAW_CAL] i=14 t_ms=21047 mv=1318.68750
+[RAW_CAL] i=15 t_ms=21207 mv=1321.37500
+[RAW_CAL] i=16 t_ms=21376 mv=1317.96875
+[RAW_CAL] i=17 t_ms=21536 mv=1319.65625
+[RAW_CAL] i=18 t_ms=21726 mv=1319.50000
+[RAW_CAL] i=19 t_ms=21886 mv=1319.81250
+[RAW_CAL] i=20 t_ms=22046 mv=1318.59375
+[RAW_CAL] i=21 t_ms=22206 mv=1320.78125
+[RAW_CAL] i=22 t_ms=22375 mv=1318.09375
+[RAW_CAL] i=23 t_ms=22535 mv=1321.12500
+[RAW_CAL] i=24 t_ms=22725 mv=1318.37500
+[RAW_CAL] i=25 t_ms=22885 mv=1318.62500
+[RAW_CAL] i=26 t_ms=23045 mv=1321.15625
+[RAW_CAL] i=27 t_ms=23205 mv=1319.21875
+[RAW_CAL] i=28 t_ms=23374 mv=1319.81250
+[RAW_CAL] i=29 t_ms=23534 mv=1317.87500
+[RAW_CAL] i=30 t_ms=23724 mv=1320.68750
+[RAW_CAL] i=31 t_ms=23884 mv=1317.68750
+[RAW_CAL] i=32 t_ms=24044 mv=1318.84375
+[RAW_CAL] i=33 t_ms=24204 mv=1317.87500
+[RAW_CAL] i=34 t_ms=24373 mv=1319.81250
+[RAW_CAL] i=35 t_ms=24533 mv=1319.28125
+[RAW_CAL] i=36 t_ms=24723 mv=1319.31250
+[RAW_CAL] i=37 t_ms=24883 mv=1321.50000
+[RAW_CAL] i=38 t_ms=25043 mv=1318.40625
+[RAW_CAL] i=39 t_ms=25203 mv=1320.25000
+[RAW_CAL] i=40 t_ms=25363 mv=1319.65625
+[RAW_CAL] i=41 t_ms=25532 mv=1318.87500
+[RAW_CAL] i=42 t_ms=25722 mv=1318.06250
+[RAW_CAL] i=43 t_ms=25882 mv=1321.28125
+[RAW_CAL] i=44 t_ms=26042 mv=1319.59375
+[RAW_CAL] i=45 t_ms=26202 mv=1320.28125
+[RAW_CAL] i=46 t_ms=26362 mv=1319.28125
+[RAW_CAL] i=47 t_ms=26531 mv=1322.15625
+[RAW_CAL] i=48 t_ms=26721 mv=1320.15625
+[RAW_CAL] i=49 t_ms=26881 mv=1320.68750
+[RAW_CAL] i=50 t_ms=27041 mv=1320.25000
+[RAW_CAL] i=51 t_ms=27201 mv=1317.50000
+[RAW_CAL] i=52 t_ms=27361 mv=1319.53125
+[RAW_CAL] i=53 t_ms=27530 mv=1320.90625
+[RAW_CAL] i=54 t_ms=27720 mv=1318.56250
+[RAW_CAL] i=55 t_ms=27880 mv=1315.78125
+[RAW_CAL] i=56 t_ms=28040 mv=1321.06250
+[RAW_CAL] i=57 t_ms=28200 mv=1318.46875
+[RAW_CAL] i=58 t_ms=28360 mv=1319.81250
+[RAW_CAL] i=59 t_ms=28529 mv=1318.25000
+[RAW_CAL] i=60 t_ms=28719 mv=1318.75000
+[RAW_CAL] i=61 t_ms=28879 mv=1319.15625
+[RAW_CAL] i=62 t_ms=29039 mv=1318.96875
+[RAW_CAL] i=63 t_ms=29199 mv=1317.78125
+[RAW_CAL] i=64 t_ms=29400 mv=1319.65625
+[RAW_CAL] i=65 t_ms=29568 mv=1318.93750
+[RAW_CAL] i=66 t_ms=29758 mv=1317.28125
+[RAW_CAL] i=67 t_ms=29918 mv=1320.06250
+[RAW_CAL] i=68 t_ms=30078 mv=1321.59375
+[RAW_CAL] i=69 t_ms=30238 mv=1316.90625
+[RAW_CAL] i=70 t_ms=30398 mv=1318.15625
+[RAW_CAL] i=71 t_ms=30567 mv=1315.93750
+[RAW_CAL] i=72 t_ms=30757 mv=1320.09375
+[RAW_CAL] i=73 t_ms=30917 mv=1321.81250
+[RAW_CAL] i=74 t_ms=31077 mv=1316.43750
+[RAW_CAL] i=75 t_ms=31237 mv=1319.65625
+[RAW_CAL] i=76 t_ms=31397 mv=1317.62500
+[RAW_CAL] i=77 t_ms=31566 mv=1316.65625
+[RAW_CAL] i=78 t_ms=31726 mv=1320.12500
+[RAW_CAL] i=79 t_ms=31916 mv=1318.43750
+[RAW_CAL] i=80 t_ms=32076 mv=1319.40625
+[RAW_CAL] i=81 t_ms=32236 mv=1319.81250
+[RAW_CAL] i=82 t_ms=32397 mv=1318.81250
+[RAW_CAL] i=83 t_ms=32565 mv=1318.96875
+[RAW_CAL] i=84 t_ms=32725 mv=1318.84375
+[RAW_CAL] i=85 t_ms=32915 mv=1318.96875
+[RAW_CAL] i=86 t_ms=33075 mv=1319.34375
+[RAW_CAL] i=87 t_ms=33235 mv=1320.43750
+[RAW_CAL] i=88 t_ms=33395 mv=1321.18750
+[RAW_CAL] i=89 t_ms=33564 mv=1319.68750
+[RAW_CAL] i=90 t_ms=33724 mv=1319.43750
+[RAW_CAL] i=91 t_ms=33914 mv=1320.12500
+[RAW_CAL] i=92 t_ms=34074 mv=1318.09375
+[RAW_CAL] i=93 t_ms=34234 mv=1318.81250
+[RAW_CAL] i=94 t_ms=34394 mv=1320.00000
+[RAW_CAL] i=95 t_ms=34563 mv=1319.31250
+[RAW_CAL] i=96 t_ms=34723 mv=1319.25000
+[RAW_CAL] i=97 t_ms=34913 mv=1318.03125
+[RAW_CAL] i=98 t_ms=35073 mv=1318.56250
+[RAW_CAL] i=99 t_ms=35233 mv=1319.59375
+[RAW_CAL] i=100 t_ms=35393 mv=1319.12500
+[RAW_CAL] i=101 t_ms=35553 mv=1319.28125
+[RAW_CAL] i=102 t_ms=35722 mv=1318.46875
+[RAW_CAL] i=103 t_ms=35912 mv=1318.46875
+[RAW_CAL] i=104 t_ms=36072 mv=1319.93750
+[RAW_CAL] i=105 t_ms=36232 mv=1318.53125
+[RAW_CAL] i=106 t_ms=36392 mv=1320.43750
+[RAW_CAL] i=107 t_ms=36552 mv=1319.65625
+[RAW_CAL] i=108 t_ms=36721 mv=1318.78125
+[RAW_CAL] i=109 t_ms=36911 mv=1319.18750
+[RAW_CAL] i=110 t_ms=37071 mv=1320.15625
+[RAW_CAL] i=111 t_ms=37231 mv=1319.56250
+[RAW_CAL] i=112 t_ms=37391 mv=1318.75000
+[RAW_CAL] i=113 t_ms=37551 mv=1319.18750
+[RAW_CAL] i=114 t_ms=37720 mv=1317.03125
+[RAW_CAL] i=115 t_ms=37910 mv=1319.68750
+[RAW_CAL] i=116 t_ms=38070 mv=1316.71875
+[RAW_CAL] i=117 t_ms=38230 mv=1319.12500
+[RAW_CAL] i=118 t_ms=38390 mv=1320.21875
+[RAW_CAL] i=119 t_ms=38550 mv=1318.81250
+[RAW_CAL] i=120 t_ms=38719 mv=1319.34375
+[RAW_CAL] i=121 t_ms=38909 mv=1317.46875
+[RAW_CAL] i=122 t_ms=39069 mv=1315.93750
+[RAW_CAL] i=123 t_ms=39229 mv=1319.78125
+[RAW_CAL] i=124 t_ms=39389 mv=1318.62500
+[RAW_CAL] i=125 t_ms=39549 mv=1318.96875
+[RAW_CAL] i=126 t_ms=39718 mv=1319.71875
+[RAW_CAL] i=127 t_ms=39878 mv=1316.59375
+[RAW_CAL] i=128 t_ms=40111 mv=1318.31250
+[RAW_CAL] i=129 t_ms=40272 mv=1319.40625
+[RAW_CAL] i=130 t_ms=40432 mv=1320.62500
+[RAW_CAL] i=131 t_ms=40592 mv=1318.18750
+[RAW_CAL] i=132 t_ms=40761 mv=1319.03125
+[RAW_CAL] i=133 t_ms=40921 mv=1321.59375
+[RAW_CAL] i=134 t_ms=41111 mv=1321.28125
+[RAW_CAL] i=135 t_ms=41271 mv=1321.71875
+[RAW_CAL] i=136 t_ms=41431 mv=1319.96875
+[RAW_CAL] i=137 t_ms=41591 mv=1320.56250
+[RAW_CAL] i=138 t_ms=41760 mv=1319.78125
+[RAW_CAL] i=139 t_ms=41920 mv=1318.06250
+[RAW_CAL] i=140 t_ms=42110 mv=1319.25000
+[RAW_CAL] i=141 t_ms=42270 mv=1319.06250
+[RAW_CAL] i=142 t_ms=42430 mv=1318.78125
+[RAW_CAL] i=143 t_ms=42590 mv=1319.71875
+[RAW_CAL] i=144 t_ms=42759 mv=1318.53125
+[RAW_CAL] i=145 t_ms=42919 mv=1319.84375
+[RAW_CAL] i=146 t_ms=43109 mv=1318.96875
+[RAW_CAL] i=147 t_ms=43269 mv=1317.46875
+[RAW_CAL] i=148 t_ms=43429 mv=1320.15625
+[RAW_CAL] i=149 t_ms=43589 mv=1319.15625
+[RAW_CAL] i=150 t_ms=43749 mv=1318.78125
+[RAW_CAL] i=151 t_ms=43918 mv=1318.46875
+[RAW_CAL] i=152 t_ms=44108 mv=1318.93750
+[RAW_CAL] i=153 t_ms=44268 mv=1318.90625
+[RAW_CAL] i=154 t_ms=44428 mv=1321.84375
+[RAW_CAL] i=155 t_ms=44588 mv=1319.18750
+[RAW_CAL] i=156 t_ms=44748 mv=1317.46875
+[RAW_CAL] i=157 t_ms=44917 mv=1318.00000
+[RAW_CAL] i=158 t_ms=45107 mv=1317.81250
+[RAW_CAL] i=159 t_ms=45267 mv=1319.25000
+[RAW_CAL] i=160 t_ms=45427 mv=1321.25000
+[RAW_CAL] i=161 t_ms=45587 mv=1318.90625
+[RAW_CAL] i=162 t_ms=45747 mv=1320.37500
+[RAW_CAL] i=163 t_ms=45916 mv=1318.71875
+[RAW_CAL] i=164 t_ms=46106 mv=1317.75000
+[RAW_CAL] i=165 t_ms=46266 mv=1319.34375
+[RAW_CAL] i=166 t_ms=46426 mv=1318.40625
+[RAW_CAL] i=167 t_ms=46586 mv=1319.68750
+[RAW_CAL] i=168 t_ms=46746 mv=1318.46875
+[RAW_CAL] i=169 t_ms=46915 mv=1321.18750
+[RAW_CAL] i=170 t_ms=47105 mv=1317.28125
+[RAW_CAL] i=171 t_ms=47265 mv=1318.59375
+[RAW_CAL] i=172 t_ms=47425 mv=1317.96875
+[RAW_CAL] i=173 t_ms=47585 mv=1316.87500
+[RAW_CAL] i=174 t_ms=47745 mv=1318.93750
+[RAW_CAL] i=175 t_ms=47914 mv=1318.59375
+[RAW_CAL] i=176 t_ms=48074 mv=1319.28125
+[RAW_CAL] i=177 t_ms=48264 mv=1319.40625
+[RAW_CAL] i=178 t_ms=48424 mv=1320.43750
+[RAW_CAL] i=179 t_ms=48584 mv=1316.75000
+[RAW_CAL] i=180 t_ms=48744 mv=1319.78125
+[RAW_CAL] i=181 t_ms=48913 mv=1319.09375
+[RAW_CAL] i=182 t_ms=49073 mv=1319.00000
+[RAW_CAL] i=183 t_ms=49263 mv=1319.25000
+[RAW_CAL] i=184 t_ms=49423 mv=1319.03125
+[RAW_CAL] i=185 t_ms=49583 mv=1318.40625
+[RAW_CAL] i=186 t_ms=49743 mv=1318.03125
+[RAW_CAL] i=187 t_ms=49912 mv=1318.09375
+[RAW_CAL] i=188 t_ms=50072 mv=1320.65625
+[RAW_CAL] i=189 t_ms=50262 mv=1319.53125
+[RAW_CAL] i=190 t_ms=50422 mv=1319.40625
+[RAW_CAL] i=191 t_ms=50582 mv=1320.68750
+[RAW_CAL] i=192 t_ms=50783 mv=1319.84375
+[RAW_CAL] i=193 t_ms=50951 mv=1318.06250
+[RAW_CAL] i=194 t_ms=51111 mv=1323.90625
+[RAW_CAL] i=195 t_ms=51301 mv=1319.84375
+[RAW_CAL] i=196 t_ms=51461 mv=1319.12500
+[RAW_CAL] i=197 t_ms=51621 mv=1319.81250
+[RAW_CAL] i=198 t_ms=51781 mv=1318.56250
+[RAW_CAL] i=199 t_ms=51950 mv=1318.31250
+[RAW_CAL] i=200 t_ms=52110 mv=1320.40625
+[RAW_CAL] i=201 t_ms=52300 mv=1320.40625
+[RAW_CAL] i=202 t_ms=52460 mv=1318.56250
+[RAW_CAL] i=203 t_ms=52620 mv=1318.06250
+[RAW_CAL] i=204 t_ms=52780 mv=1315.81250
+[RAW_CAL] i=205 t_ms=52949 mv=1319.50000
+[RAW_CAL] i=206 t_ms=53109 mv=1317.81250
+[RAW_CAL] i=207 t_ms=53299 mv=1317.78125
+[RAW_CAL] i=208 t_ms=53459 mv=1320.46875
+[RAW_CAL] i=209 t_ms=53619 mv=1319.12500
+[RAW_CAL] i=210 t_ms=53779 mv=1318.18750
+[RAW_CAL] i=211 t_ms=53939 mv=1321.28125
+[RAW_CAL] i=212 t_ms=54108 mv=1316.59375
+[RAW_CAL] i=213 t_ms=54298 mv=1317.09375
+[RAW_CAL] i=214 t_ms=54458 mv=1319.96875
+[RAW_CAL] i=215 t_ms=54618 mv=1318.71875
+[RAW_CAL] i=216 t_ms=54778 mv=1319.53125
+[RAW_CAL] i=217 t_ms=54938 mv=1316.37500
+[RAW_CAL] i=218 t_ms=55107 mv=1320.12500
+[RAW_CAL] i=219 t_ms=55297 mv=1318.09375
+[RAW_CAL] i=220 t_ms=55457 mv=1316.34375
+[RAW_CAL] i=221 t_ms=55617 mv=1320.50000
+[RAW_CAL] i=222 t_ms=55777 mv=1318.56250
+[RAW_CAL] i=223 t_ms=55937 mv=1318.62500
+[RAW_CAL] i=224 t_ms=56106 mv=1317.71875
+[RAW_CAL] i=225 t_ms=56296 mv=1316.53125
+[RAW_CAL] i=226 t_ms=56456 mv=1319.06250
+[RAW_CAL] i=227 t_ms=56616 mv=1319.21875
+[RAW_CAL] i=228 t_ms=56776 mv=1317.43750
+[RAW_CAL] i=229 t_ms=56936 mv=1317.59375
+[RAW_CAL] i=230 t_ms=57105 mv=1317.65625
+[RAW_CAL] i=231 t_ms=57295 mv=1318.84375
+[RAW_CAL] i=232 t_ms=57455 mv=1317.81250
+[RAW_CAL] i=233 t_ms=57615 mv=1318.87500
+[RAW_CAL] i=234 t_ms=57775 mv=1320.06250
+[RAW_CAL] i=235 t_ms=57935 mv=1319.68750
+[RAW_CAL] i=236 t_ms=58104 mv=1318.90625
+[RAW_CAL] i=237 t_ms=58264 mv=1320.06250
+[RAW_CAL] i=238 t_ms=58454 mv=1320.21875
+[RAW_CAL] i=239 t_ms=58614 mv=1318.00000
+[RAW_CAL] i=240 t_ms=58774 mv=1319.53125
+[RAW_CAL] i=241 t_ms=58934 mv=1319.09375
+[RAW_CAL] i=242 t_ms=59103 mv=1320.00000
+[RAW_CAL] i=243 t_ms=59263 mv=1319.06250
+[RAW_CAL] i=244 t_ms=59453 mv=1317.75000
+[RAW_CAL] i=245 t_ms=59613 mv=1320.84375
+[RAW_CAL] i=246 t_ms=59773 mv=1319.37500
+[RAW_CAL] i=247 t_ms=59933 mv=1318.09375
+[RAW_CAL] i=248 t_ms=60102 mv=1318.62500
+[RAW_CAL] i=249 t_ms=60262 mv=1316.65625
+[RAW_CAL] i=250 t_ms=60452 mv=1317.25000
+[RAW_CAL] i=251 t_ms=60612 mv=1320.25000
+[RAW_CAL] i=252 t_ms=60772 mv=1319.68750
+[RAW_CAL] i=253 t_ms=60932 mv=1319.21875
+[RAW_CAL] i=254 t_ms=61101 mv=1319.37500
+[RAW_CAL] i=255 t_ms=61261 mv=1318.65625
+[RAW_CAL] END
+V=8.144 V, currentADC=1318.42 mV, I=null A (below_resolution), T=30.44 C (measured), MQTT=published, calibration=ACCEPTED samples=256/256 uptime_ms=62361
+V=8.144 V, currentADC=1318.97 mV, I=null A (below_resolution), T=30.50 C (measured), MQTT=published, calibration=ACCEPTED samples=256/256 uptime_ms=63380
+V=8.147 V, currentADC=1320.16 mV, I=null A (below_resolution), T=30.50 C (measured), MQTT=published, calibration=ACCEPTED samples=256/256 uptime_ms=64399
