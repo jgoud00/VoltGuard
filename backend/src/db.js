@@ -8,10 +8,23 @@ const sqlite = process.env.DATABASE_DRIVER === 'sqlite';
 const store = await import(sqlite ? './sqlite.js' : './mongo.js');
 export const databaseDriver = sqlite ? 'sqlite' : 'mongodb';
 export const db = store.db;
-export const latest = store.latest;
-export const history = store.history;
-export const alerts = store.alerts;
-export const saveTelemetry = store.saveTelemetry;
-export const saveAlert = store.saveAlert;
-export const resolveAlert = store.resolveAlert;
-export const transaction = store.transaction;
+export let dbHealthy = true;
+const trackHealth =
+  (operation) =>
+  async (...args) => {
+    try {
+      const result = await operation(...args);
+      dbHealthy = true;
+      return result;
+    } catch (error) {
+      dbHealthy = false;
+      throw error;
+    }
+  };
+export const latest = trackHealth(store.latest);
+export const history = trackHealth(store.history);
+export const alerts = trackHealth(store.alerts);
+export const saveTelemetry = trackHealth(store.saveTelemetry);
+export const saveAlert = trackHealth(store.saveAlert);
+export const resolveAlert = trackHealth(store.resolveAlert);
+export const transaction = trackHealth(store.transaction);

@@ -93,11 +93,62 @@ test(
             packet.type === 'telemetry' && packet.data.id === third.id,
         ),
       );
+      const active = await server.json(
+        '/api/alerts?deviceId=mongo-test&active=true',
+      );
+      const database = databaseClient.db(name);
+      await database.collection('alerts').insertMany(
+        Array.from({ length: 5001 }, (_, i) => ({
+          ...active[0],
+          id: i + 2,
+          active: false,
+          resolvedAt: third.receivedAt,
+        })),
+      );
+      await database
+        .collection('counters')
+        .updateOne({ _id: 'alerts' }, { $max: { value: 5002 } });
+      assert.ok(
+        (await server.json('/api/alerts?deviceId=mongo-test')).every(
+          (a) => !a.active,
+        ),
+      );
+      assert.deepEqual(
+        (
+          await server.json(
+            '/api/alerts?deviceId=mongo-test&active=true&limit=1',
+          )
+        ).map((a) => a.id),
+        [active[0].id],
+      );
+      await publish(calibrated);
+      const fourth = await until(async () => {
+        const value = await server.json('/api/latest?deviceId=mongo-test');
+        return value.id > third.id && value;
+      });
+      assert.equal(
+        await database.collection('alerts').countDocuments({ active: true }),
+        1,
+      );
+      await publish({ ...calibrated, temperature: 30 });
+      const fifth = await until(async () => {
+        const value = await server.json('/api/latest?deviceId=mongo-test');
+        return value.id > fourth.id && value;
+      });
+      assert.deepEqual(
+        await server.json('/api/alerts?deviceId=mongo-test&active=true'),
+        [],
+      );
+      assert.equal(
+        (await database.collection('alerts').findOne({ id: active[0].id }))
+          .active,
+        false,
+      );
       const persisted = await databaseClient
         .db(name)
         .collection('telemetry')
-        .findOne({ id: third.id });
-      assert.equal(persisted.energy, third.energy);
+        .findOne({ id: fifth.id });
+      assert.equal(persisted.energy, fifth.energy);
       await publisher.endAsync();
       publisher = null;
       socket.close();
@@ -105,11 +156,11 @@ test(
       await server.stop();
       server = await stack(3310, 18890, options);
       const restored = await server.json('/api/latest?deviceId=mongo-test');
-      assert.equal(restored.id, third.id);
-      assert.equal(restored.energy, third.energy);
+      assert.equal(restored.id, fifth.id);
+      assert.equal(restored.energy, fifth.energy);
       assert.equal(
         (await server.json('/api/history?deviceId=mongo-test')).length,
-        3,
+        5,
       );
     } finally {
       if (publisher) await publisher.endAsync();

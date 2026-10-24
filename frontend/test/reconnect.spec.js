@@ -44,7 +44,11 @@ test('reconnect restores recovered alerts and ignores other devices, including R
       },
       '/api/health': { mqttConnected: true },
     };
-    if (url.pathname === '/api/alerts' && pauseAlerts)
+    if (
+      url.pathname === '/api/alerts' &&
+      !url.searchParams.has('active') &&
+      pauseAlerts
+    )
       await new Promise((resolve) => {
         releaseAlerts = resolve;
       });
@@ -98,4 +102,10 @@ test('reconnect restores recovered alerts and ignores other devices, including R
   await expect(page.locator('.event-count')).toHaveText('0 active');
   await page.getByRole('tab', { name: /Recent history/ }).click();
   await expect(page.locator('.event-state.recovered')).toHaveCount(2);
+  releaseAlerts = undefined;
+  await page.evaluate(() => window.__auditSocket.onclose());
+  await expect.poll(() => Boolean(releaseAlerts)).toBe(true);
+  await send('alert', { ...event, id: 3, active: true });
+  releaseAlerts();
+  await expect(page.locator('.event-count')).toHaveText('1 active');
 });

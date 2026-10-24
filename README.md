@@ -90,6 +90,8 @@ Timestamp is optional: omitted values use server UTC. Supplied ISO dates must be
 
 ## REST and WebSocket
 
+`GET /api/alerts?active=true` returns every active condition independently of the recent-history limit. The dashboard keeps these conditions visible until recovery. AC230 does not support the Charging scenario; changing from a charging battery profile to AC230 selects Normal operation.
+
 | Route                         | Purpose                                                                                |
 | ----------------------------- | -------------------------------------------------------------------------------------- |
 | GET /api/health               | MQTT, database, socket client count, ingestion counters and heap bytes                 |

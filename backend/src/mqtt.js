@@ -46,7 +46,9 @@ export async function createMqttClient(broadcast) {
     mqttReady = false;
   });
 
-  client.on('error', (e) => console.warn('[MQTT]', e.code || 'Connection error'));
+  client.on('error', (e) =>
+    console.warn('[MQTT]', e.code || 'Connection error'),
+  );
 
   client.on('message', async (topic, payload) => {
     try {
@@ -60,7 +62,8 @@ export async function createMqttClient(broadcast) {
       )
         throw new Error('Topic/device mismatch');
       const result = await ingest(raw);
-      if (result) broadcast({ type: 'telemetry', data: result.sample });
+      if (!result) return;
+      broadcast({ type: 'telemetry', data: result.sample });
       for (const e of result.events) {
         console.log(
           `[ALERT] ${e.data.code} ${e.data.active ? 'active' : 'recovered'}`,

@@ -94,6 +94,7 @@ test(
       await publish(previous);
       await delay(100);
       assert.equal((await s.json('/api/health')).duplicates, 1);
+      assert.equal((await s.json('/api/health')).rejected, 2);
       for (const [code, change] of Object.entries({
         OVERVOLTAGE: { voltage: 270, power: 270 },
         UNDERVOLTAGE: { voltage: 190, power: 190 },
@@ -153,6 +154,8 @@ test(
         'http-test',
         '--profile',
         'AC230',
+        '--rate',
+        '5',
         '--duration',
         '1',
       ]);
@@ -162,6 +165,79 @@ test(
           'simulation',
       );
       assert.ok(packets[1].some((e) => e.type === 'alert'));
+      await until(() =>
+        packets[1].some(
+          (e) => e.type === 'telemetry' && e.data.deviceId === 'http-test',
+        ),
+      );
+      const energyHistory = await until(async () => {
+        const rows = await s.json('/api/history?deviceId=http-test');
+        return rows.length >= 2 && rows;
+      });
+      assert.ok(energyHistory.at(-1).energy > energyHistory[0].energy);
+      for (const temperature of [60, 30]) {
+        const response = await s.json('/api/simulator/telemetry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...sample({ temperature }),
+            deviceId: 'http-alert',
+          }),
+        });
+        assert.equal(response.accepted, true);
+        await until(() =>
+          packets[1].some(
+            (e) =>
+              e.type === 'alert' &&
+              e.data.deviceId === 'http-alert' &&
+              e.data.active === (temperature === 60),
+          ),
+        );
+      }
+      const httpPrevious = await s.json('/api/latest?deviceId=http-alert');
+      assert.deepEqual(
+        await s.json('/api/simulator/telemetry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(httpPrevious),
+        }),
+        { accepted: false },
+      );
+      assert.equal(
+        packets[1].filter((e) => e.data.deviceId === 'http-alert').length,
+        4,
+      );
+      for (const body of [
+        { mode: 'CHARGING', profile: 'AC230' },
+        { mode: 'CHARGING', profile: '' },
+      ]) {
+        assert.equal(
+          (
+            await fetch(s.api + '/api/simulator/mode', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(body),
+            })
+          ).status,
+          400,
+        );
+      }
+      await s.json('/api/simulator/mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'CHARGING', profile: '12V' }),
+      });
+      assert.equal(
+        (
+          await fetch(s.api + '/api/simulator/mode', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mode: 'CHARGING', profile: 'AC230' }),
+          })
+        ).status,
+        400,
+      );
+      assert.equal((await s.json('/api/simulator/config')).profile, '12V');
     } finally {
       client?.end(true);
       sockets.forEach((w) => w.terminate());

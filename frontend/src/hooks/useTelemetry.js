@@ -9,6 +9,10 @@ const merge = (previous, incoming) =>
   [...new Map([...previous, ...incoming].map((s) => [s.id, s])).values()]
     .sort((a, b) => a.id - b.id)
     .slice(-100);
+const retainAlerts = (events) =>
+  events
+    .sort((a, b) => b.id - a.id)
+    .filter((event, index) => event.active || index < 30);
 
 export function useTelemetry() {
   const [samples, setSamples] = useState([]);
@@ -30,6 +34,9 @@ export function useTelemetry() {
     let alive = true,
       socket,
       retry,
+      loadRetry,
+      loading = false,
+      loadingAlerts = new Map(),
       deviceId;
     const controller = new AbortController();
     const request = async (path) => {
@@ -48,32 +55,49 @@ export function useTelemetry() {
       }
     };
     const load = async () => {
+      if (!alive || loading) return;
+      loading = true;
+      loadingAlerts = new Map();
+      clearTimeout(loadRetry);
       try {
         const next = await request('/api/device');
         if (!alive) return;
         deviceId = next.deviceId;
         const query = `deviceId=${encodeURIComponent(deviceId)}`;
-        const [history, events] = await Promise.all([
+        const [history, events, activeEvents] = await Promise.all([
           request(`/api/history?limit=100&${query}`),
           request(`/api/alerts?${query}`),
+          request(`/api/alerts?active=true&${query}`),
         ]);
         if (!alive) return;
+        const liveEvents = [...loadingAlerts.values()];
         setSamples((current) => merge(history, current));
         setAlerts((current) => {
-          const merged = new Map([...events, ...current].map((a) => [a.id, a]));
+          const merged = new Map(
+            [
+              ...events,
+              ...activeEvents,
+              ...current.filter((a) => !a.active),
+              ...liveEvents,
+            ].map((a) => [a.id, a]),
+          );
           // Recovery is final for an event ID, including during a REST/socket race.
-          for (const event of events)
+          for (const event of [...events, ...current, ...liveEvents])
             if (!event.active) merged.set(event.id, event);
-          return [...merged.values()].sort((a, b) => b.id - a.id).slice(0, 30);
+          return retainAlerts([...merged.values()]);
         });
         setDevice(next);
         setConfig({ mode: next.mode, profile: next.profile });
         setError('');
       } catch {
-        if (alive)
+        if (alive) {
           setError(
             'Backend unavailable. The dashboard will reconnect automatically.',
           );
+          loadRetry = setTimeout(load, 1500);
+        }
+      } finally {
+        loading = false;
       }
     };
     const connect = () => {
@@ -98,13 +122,15 @@ export function useTelemetry() {
             validateTelemetry(packet.data);
             setSamples((current) => merge(current, [packet.data]));
           }
-          if (packet.type === 'alert' && packet.data?.id)
+          if (packet.type === 'alert' && packet.data?.id) {
+            if (loading) loadingAlerts.set(packet.data.id, packet.data);
             setAlerts((current) =>
-              [
+              retainAlerts([
                 packet.data,
                 ...current.filter((a) => a.id !== packet.data.id),
-              ].slice(0, 30),
+              ]),
             );
+          }
           if (packet.type === 'simulation') setConfig(packet.data);
         } catch {
           /* Invalid messages never reach the visual components. */
@@ -126,6 +152,7 @@ export function useTelemetry() {
       alive = false;
       controller.abort();
       clearTimeout(retry);
+      clearTimeout(loadRetry);
       clearInterval(healthTimer);
       socket?.close();
     };

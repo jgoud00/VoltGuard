@@ -4,21 +4,22 @@ import { db } from './db.js';
 import { createHttpServer } from './http.js';
 import { createWebSocketServer } from './ws.js';
 import { createMqttClient } from './mqtt.js';
-import { ingest, count, getRejected, duplicates, dbHealthy, getIngestion } from './ingest.js';
+import { count, getRejected, duplicates, getIngestion } from './ingest.js';
 
 const server = createServer();
-const http = createHttpServer(() => ({
-  count,
-  rejected: getRejected(),
-  duplicates,
-  dbHealthy,
-  mqttReady: mqttState.getReady(),
-  wsClients: wssState.wss.clients.size,
-}));
-server.on('request', http.app);
-
 const wssState = createWebSocketServer(server);
 const { broadcast, heartbeat } = wssState;
+const http = createHttpServer(
+  () => ({
+    count,
+    rejected: getRejected(),
+    duplicates,
+    mqttReady: mqttState.getReady(),
+    wsClients: wssState.wss.clients.size,
+  }),
+  broadcast,
+);
+server.on('request', http.app);
 
 const mqttState = await createMqttClient(broadcast);
 

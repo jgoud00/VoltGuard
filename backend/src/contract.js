@@ -6,6 +6,8 @@ export {
   topic,
   validateTelemetry,
   validDevice,
+  validSimulation,
 } from '../../shared/telemetry.js';
-export const evaluateAlerts = (sample) => evaluateAlertsPure(sample, thresholds);
+export const evaluateAlerts = (sample) =>
+  evaluateAlertsPure(sample, thresholds);
 export { evaluateAlertsPure };

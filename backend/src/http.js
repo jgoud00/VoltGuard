@@ -1,16 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import { config } from './config.js';
-import { validDevice, PROFILES, MODES } from './contract.js';
-import {
-  latest,
-  history,
-  alerts,
-  databaseDriver,
-} from './db.js';
-import { ingest, getRejected } from './ingest.js';
+import { validDevice, validSimulation, PROFILES, MODES } from './contract.js';
+import { latest, history, alerts, databaseDriver, dbHealthy } from './db.js';
+import { ingest } from './ingest.js';
 
-export function createHttpServer(getState) {
+export function createHttpServer(getState, broadcast) {
   const app = express();
   app.set('query parser', 'extended');
   app.use(cors({ origin: config.origins }));
@@ -40,6 +35,8 @@ export function createHttpServer(getState) {
   let profile = PROFILES.includes(process.env.BATTERY_PROFILE)
     ? process.env.BATTERY_PROFILE
     : '12V';
+  if (config.simulation && !validSimulation(mode, profile))
+    throw new Error('Invalid simulation mode or profile');
 
   const simulationAuth = (req, res, next) => {
     if (!config.simulation)
@@ -48,10 +45,13 @@ export function createHttpServer(getState) {
       req.socket.remoteAddress,
     );
     if (
-      (config.token && req.headers.authorization !== `Bearer ${config.token}`) ||
+      (config.token &&
+        req.headers.authorization !== `Bearer ${config.token}`) ||
       (!config.token && !local)
     )
-      return res.status(403).json({ error: 'Simulator authorization required' });
+      return res
+        .status(403)
+        .json({ error: 'Simulator authorization required' });
     if (req.headers.origin && !config.origins.includes(req.headers.origin))
       return res.status(403).json({ error: 'Origin denied' });
     next();
@@ -65,13 +65,13 @@ export function createHttpServer(getState) {
 
   app.get('/api/health', (_req, res) => {
     const state = getState();
-    res.status(state.dbHealthy ? 200 : 503).json({
-      status: state.dbHealthy ? 'ok' : 'degraded',
+    res.status(dbHealthy ? 200 : 503).json({
+      status: dbHealthy ? 'ok' : 'degraded',
       mqttConnected: state.mqttReady,
       mqtt: state.mqttReady ? 'connected' : 'disconnected',
       websocket: 'running',
       websocketClients: state.wsClients,
-      database: state.dbHealthy ? 'ok' : 'unavailable',
+      database: dbHealthy ? 'ok' : 'unavailable',
       databaseDriver,
       accepted: state.count,
       rejected: state.rejected,
@@ -105,9 +105,20 @@ export function createHttpServer(getState) {
     );
   });
 
-  app.get('/api/alerts', async (req, res) =>
-    res.json(await alerts(device(req), limit(req.query.limit, 30))),
-  );
+  app.get('/api/alerts', async (req, res) => {
+    if (
+      req.query.active !== undefined &&
+      !['true', 'false'].includes(req.query.active)
+    )
+      return res.status(400).json({ error: 'Invalid active filter' });
+    res.json(
+      await alerts(
+        device(req),
+        limit(req.query.limit, 30),
+        req.query.active === 'true',
+      ),
+    );
+  });
 
   app.get('/api/device', async (req, res) => {
     const s = await latest(device(req));
@@ -126,12 +137,7 @@ export function createHttpServer(getState) {
   });
 
   app.post('/api/simulator/mode', simulationAuth, (req, res) => {
-    if (
-      !MODES.includes(req.body?.mode) ||
-      (req.body.profile &&
-        (!PROFILES.includes(req.body.profile) ||
-          req.body.profile === 'LI_ION_2S'))
-    )
+    if (!validSimulation(req.body?.mode, req.body?.profile ?? profile))
       return res.status(400).json({ error: 'Invalid mode or profile' });
     mode = req.body.mode;
     if (req.body.profile) profile = req.body.profile;
@@ -144,9 +150,12 @@ export function createHttpServer(getState) {
 
   app.post('/api/simulator/telemetry', simulationAuth, async (req, res) => {
     try {
-      res.json({
-        accepted: !!(await ingest({ ...req.body, source: 'simulation' })),
-      });
+      const result = await ingest({ ...req.body, source: 'simulation' });
+      if (result) {
+        broadcast({ type: 'telemetry', data: result.sample });
+        for (const event of result.events) broadcast(event);
+      }
+      res.json({ accepted: !!result });
     } catch (error) {
       if (
         error.code?.toString().startsWith('SQLITE') ||
@@ -165,5 +174,5 @@ export function createHttpServer(getState) {
     });
   });
 
-  return { app, getMode: () => mode, getProfile: () => profile, setMode: (m) => { mode = m; }, setProfile: (p) => { profile = p; } };
+  return { app };
 }

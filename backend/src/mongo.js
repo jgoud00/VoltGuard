@@ -16,6 +16,7 @@ await Promise.all([
   mongo.collection('telemetry').createIndex({ deviceId: 1, timestamp: 1 }),
   mongo.collection('alerts').createIndex({ id: 1 }, { unique: true }),
   mongo.collection('alerts').createIndex({ deviceId: 1, id: -1 }),
+  mongo.collection('alerts').createIndex({ deviceId: 1, active: 1, id: -1 }),
 ]);
 export const db = { close: () => client.close() };
 export async function transaction(callback) {
@@ -81,11 +82,14 @@ export async function history(deviceId, limit, from, to) {
       .toArray()
   ).reverse();
 }
-export async function alerts(deviceId, limit = 30) {
+export async function alerts(deviceId, limit = 30, activeOnly = false) {
   return mongo
     .collection('alerts')
-    .find({ deviceId }, { projection: { _id: 0 }, ...options() })
+    .find(
+      { deviceId, ...(activeOnly ? { active: true } : {}) },
+      { projection: { _id: 0 }, ...options() },
+    )
     .sort({ id: -1 })
-    .limit(limit)
+    .limit(activeOnly ? 0 : limit)
     .toArray();
 }

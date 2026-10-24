@@ -1,4 +1,4 @@
-﻿// Display-only formatting and demo values. Never sent to MQTT or persistence.
+// Display-only formatting and demo values. Never sent to MQTT or persistence.
 const demoStarted = Date.now() - 120000;
 
 export const fmt = (value, digits = 1) =>
@@ -41,24 +41,72 @@ export const scenarios = {
 };
 
 export const signals = [
-  { key: 'voltage', title: 'Voltage', unit: 'V', digits: 2, color: '#296653', note: 'Terminal voltage' },
-  { key: 'current', title: 'Current', unit: 'A', digits: 2, color: '#786043', note: 'Positive = discharge' },
-  { key: 'power', title: 'Power', unit: 'W', digits: 2, color: '#496783', note: 'Derived from voltage and current' },
-  { key: 'temperature', title: 'Temperature', unit: '°C', digits: 1, color: '#a8694d', note: 'Probe reading' },
-  { key: 'soc', title: 'State of charge', unit: '%', digits: 1, color: '#296653', note: 'State of charge · battery model required' },
-  { key: 'soh', title: 'Battery health (SOH)', unit: '%', digits: 1, color: '#686d7e', note: 'State of health · capacity assessment required' },
+  {
+    key: 'voltage',
+    title: 'Voltage',
+    unit: 'V',
+    digits: 2,
+    color: '#087e83',
+    note: 'Terminal voltage',
+  },
+  {
+    key: 'current',
+    title: 'Current',
+    unit: 'A',
+    digits: 2,
+    color: '#426bc0',
+    note: 'Positive = discharge',
+  },
+  {
+    key: 'power',
+    title: 'Power',
+    unit: 'W',
+    digits: 2,
+    color: '#a36b38',
+    note: 'Derived from voltage and current',
+  },
+  {
+    key: 'temperature',
+    title: 'Temperature',
+    unit: '°C',
+    digits: 1,
+    color: '#9760a0',
+    note: 'Probe reading',
+  },
+  {
+    key: 'soc',
+    title: 'State of charge',
+    unit: '%',
+    digits: 1,
+    color: '#087e83',
+    note: 'State of charge · battery model required',
+  },
+  {
+    key: 'soh',
+    title: 'Battery health (SOH)',
+    unit: '%',
+    digits: 1,
+    color: '#5c728e',
+    note: 'State of health · capacity assessment required',
+  },
 ];
 
 export function measurementNote(sample, key) {
   if (sample?.demoFields?.includes(key)) return 'Demo value · not measured';
-  if (['power', 'energy'].includes(key) && sample?.quality?.current === 'calibrated_limited')
+  if (
+    ['power', 'energy'].includes(key) &&
+    sample?.quality?.current === 'calibrated_limited'
+  )
     return key === 'energy'
       ? 'Stored discharge estimate · gaps excluded'
       : 'V × nominal I · noise-limited';
   if (key === 'current' && sample?.quality?.current === 'calibrated_limited')
     return 'Nominal current · noise-limited';
   if (!sample) return 'Awaiting data';
-  if (key === 'energy' && sample.quality?.energy === 'nominal_discharge_partial')
+  if (
+    key === 'energy' &&
+    sample.quality?.energy === 'nominal_discharge_partial'
+  )
     return 'Stored discharge estimate · gaps excluded';
   if (['soc', 'soh'].includes(key) && !Number.isFinite(sample[key]))
     return 'Unavailable · battery characterization required';

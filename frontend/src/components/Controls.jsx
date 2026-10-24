@@ -1,4 +1,4 @@
-﻿import * as Dialog from '@radix-ui/react-dialog';
+import * as Dialog from '@radix-ui/react-dialog';
 import * as Select from '@radix-ui/react-select';
 import {
   Check,
@@ -9,7 +9,7 @@ import {
   ArrowRight,
   CircleHelp,
 } from 'lucide-react';
-import { MODES } from '../../../shared/telemetry.js';
+import { MODES, validSimulation } from '../../../shared/telemetry.js';
 import { profiles, scenarios } from '../format.js';
 export function SelectField({
   label,
@@ -82,7 +82,7 @@ export function SimulationPanel({ config, busy, enabled, error, onChange }) {
               </button>
             </Dialog.Close>
           </div>
-          <span className="overline">DEVELOPMENT WORKSPACE</span>
+          <span className="overline">Test environment</span>
           <Dialog.Title>Simulation settings</Dialog.Title>
           <Dialog.Description>
             Publish a test signal through the same pipeline used by your device.
@@ -96,7 +96,14 @@ export function SimulationPanel({ config, busy, enabled, error, onChange }) {
                 Object.entries(profiles).filter(([key]) => key !== 'LI_ION_2S'),
               )}
               disabled={busy}
-              onChange={(profile) => onChange({ profile })}
+              onChange={(profile) =>
+                onChange({
+                  profile,
+                  mode: validSimulation(config.mode, profile)
+                    ? config.mode
+                    : 'NORMAL',
+                })
+              }
             />
           </div>
           <div className="scenario-heading">
@@ -107,7 +114,7 @@ export function SimulationPanel({ config, busy, enabled, error, onChange }) {
             {MODES.map((mode) => (
               <button
                 key={mode}
-                disabled={busy}
+                disabled={busy || !validSimulation(mode, config.profile)}
                 aria-pressed={config.mode === mode}
                 className={`scenario-button ${config.mode === mode ? 'selected' : ''}`}
                 onClick={() => onChange({ mode })}

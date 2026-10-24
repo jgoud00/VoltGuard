@@ -67,6 +67,9 @@ if (
       CREATE INDEX telemetry_time ON telemetry(device_id, timestamp);`);
   })();
 }
+db.exec(
+  'CREATE INDEX IF NOT EXISTS alerts_active ON alerts(device_id, active, id DESC)',
+);
 const map = (r) =>
   r && {
     id: r.id,
@@ -126,10 +129,12 @@ export function history(deviceId, limit, from, to) {
     .all({ deviceId, limit, from, to })
     .map(map);
 }
-export function alerts(id, limit = 30) {
+export function alerts(id, limit = 30, activeOnly = false) {
   return db
-    .prepare('SELECT * FROM alerts WHERE device_id=? ORDER BY id DESC LIMIT ?')
-    .all(id, limit)
+    .prepare(
+      `SELECT * FROM alerts WHERE device_id=?${activeOnly ? ' AND active=1' : ''} ORDER BY id DESC LIMIT ?`,
+    )
+    .all(id, activeOnly ? -1 : limit)
     .map((r) => ({
       id: r.id,
       deviceId: r.device_id,

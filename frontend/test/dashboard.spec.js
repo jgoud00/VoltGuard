@@ -1,4 +1,4 @@
-﻿import { test, expect } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 test('dashboard renders charts, keeps history, reconnects and fits mobile', async ({
   page,
@@ -24,11 +24,11 @@ test('dashboard renders charts, keeps history, reconnects and fits mobile', asyn
     page.getByRole('heading', { name: /Energy overview/ }),
   ).toBeVisible();
   await expect(page.getByRole('status')).toHaveText('LIVE');
-  await expect(page.locator('canvas')).toHaveCount(6);
-  for (const canvas of await page.locator('canvas').all())
+  await expect(page.locator('canvas[role=img]')).toHaveCount(6);
+  for (const canvas of await page.locator('canvas[role=img]').all())
     await expect(canvas).toBeVisible();
   await expect(page.locator('[data-metric=voltage] strong')).toHaveText(/\d/);
-  const firstChart = page.locator('canvas').first();
+  const firstChart = page.locator('canvas[role=img]').first();
   const before = await firstChart.screenshot();
   await expect
     .poll(async () => (await firstChart.screenshot()).equals(before), {
@@ -101,6 +101,9 @@ test('MQTT simulator faults, alert recovery, offline and resume reach dashboard'
     ]) {
       await mode(scenario);
       await expect(page.locator('.status')).toHaveText('CRITICAL');
+      await expect(page.locator('#overview .condition-link')).toHaveText(
+        /^[1-9]\d* active conditions$/,
+      );
       const expectedCode = code
         .replace('OVER VOLTAGE', 'OVERVOLTAGE')
         .replace('UNDER VOLTAGE', 'UNDERVOLTAGE')
@@ -151,6 +154,12 @@ test('backend unavailable and malformed WebSocket data are safe', async ({
     page.getByRole('heading', { name: /Energy overview/ }),
   ).toBeVisible();
   await expect(page.getByRole('status')).toHaveText('AWAITING TELEMETRY');
+  await expect(page.locator('#overview .source-label')).toHaveText(
+    'Awaiting source',
+  );
+  await expect(page.locator('#overview .receipt-label')).toContainText(
+    'Awaiting telemetry',
+  );
   await expect(page.locator('.status')).toHaveText('AWAITING DATA');
   expect(errors).toEqual([]);
 });

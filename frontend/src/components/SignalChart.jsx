@@ -1,4 +1,4 @@
-﻿import { memo, useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -18,7 +18,7 @@ ChartJS.register(
   Tooltip,
   Filler,
 );
-export function Sparkline({ samples, metric, color = '#296653' }) {
+export function Sparkline({ samples, metric, color = '#087e83' }) {
   const points = samples.slice(-30).map((s) => s[metric]);
   const available = points.filter(Number.isFinite);
   if (available.length < 2)
@@ -107,14 +107,14 @@ export const SignalChart = memo(function SignalChart({
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: '#1e3029',
-          titleColor: '#ccd7cf',
+          backgroundColor: '#18252d',
+          titleColor: '#c4d8df',
           bodyColor: '#fff',
           displayColors: false,
           padding: 12,
           cornerRadius: 4,
           titleFont: { family: 'Inter', size: 10, weight: 'normal' },
-          bodyFont: { family: 'IBM Plex Mono', size: 12 },
+          bodyFont: { family: 'Inter', size: 12 },
           callbacks: {
             label: (ctx) => `${fmt(ctx.parsed.y, spec.digits)} ${spec.unit}`,
           },
@@ -125,20 +125,20 @@ export const SignalChart = memo(function SignalChart({
           border: { display: false },
           grid: { display: false },
           ticks: {
-            color: '#8b8e86',
+            color: '#526975',
             maxTicksLimit: primary ? 7 : 4,
             maxRotation: 0,
-            font: { family: 'IBM Plex Mono', size: 10 },
+            font: { family: 'Inter', size: 10 },
             padding: 10,
           },
         },
         y: {
           border: { display: false },
-          grid: { color: '#eceee8', tickLength: 0 },
+          grid: { color: '#e4ecef', tickLength: 0 },
           ticks: {
-            color: '#8b8e86',
+            color: '#526975',
             maxTicksLimit: 5,
-            font: { family: 'IBM Plex Mono', size: 10 },
+            font: { family: 'Inter', size: 10 },
             padding: 12,
           },
         },
@@ -158,7 +158,7 @@ export const SignalChart = memo(function SignalChart({
       <div className="chart-heading">
         <div>
           <span className="overline">
-            {primary ? 'SIGNAL MONITOR' : spec.note}
+            {primary ? 'Signal monitor' : spec.note}
           </span>
           <h3>
             {spec.title}
@@ -207,7 +207,7 @@ export const SignalChart = memo(function SignalChart({
       {primary && (
         <div className="chart-footer">
           <span>
-            MIN{' '}
+            Min{' '}
             <b>
               {fmt(
                 points.length ? Math.min(...points) : undefined,
@@ -217,7 +217,7 @@ export const SignalChart = memo(function SignalChart({
             </b>
           </span>
           <span>
-            MAX{' '}
+            Max{' '}
             <b>
               {fmt(
                 points.length ? Math.max(...points) : undefined,

@@ -3,8 +3,7 @@ import mqtt from 'mqtt';
 import { fileURLToPath } from 'node:url';
 import { profiles, ocvFromSoc } from '../shared/battery.js';
 import {
-  MODES,
-  PROFILES,
+  validSimulation,
   topic,
   validDevice,
   validateTelemetry,
@@ -31,9 +30,7 @@ const rate = Number(option('rate', 1)),
   deviceId = option('device', process.env.DEVICE_ID || 'voltguard-01'),
   transport = option('transport', 'mqtt');
 if (
-  !MODES.includes(mode) ||
-  !PROFILES.includes(profile) ||
-  profile === 'LI_ION_2S' ||
+  !validSimulation(mode, profile) ||
   !validDevice(deviceId) ||
   !Number.isFinite(rate) ||
   rate <= 0 ||
@@ -75,9 +72,10 @@ async function tick() {
       });
       if (r.ok) {
         const c = await r.json();
-        if (MODES.includes(c.mode)) mode = c.mode;
-        if (PROFILES.includes(c.profile) && c.profile !== 'LI_ION_2S')
+        if (validSimulation(c.mode, c.profile)) {
+          mode = c.mode;
           profile = c.profile;
+        }
       }
     } catch {}
   const now = Date.now(),
@@ -113,7 +111,7 @@ async function tick() {
         : voltage + Math.sin(phase * 4) * 2;
   voltage = Number(voltage.toFixed(2));
   current = Number(current.toFixed(2));
-  // Send raw sensor values; backend derives power/energy (single source of truth)
+  energy += (Math.abs(voltage * current) * elapsed) / 1000;
   const sample = validateTelemetry({
     deviceId,
     timestamp: new Date().toISOString(),
@@ -121,6 +119,7 @@ async function tick() {
     voltage,
     current,
     temperature,
+    energy,
     soc: p ? soc : undefined,
     soh: p ? soh : undefined,
     internalResistance: p ? resistance : undefined,

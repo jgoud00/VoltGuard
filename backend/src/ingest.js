@@ -12,10 +12,13 @@ import { evaluateAlerts, validateTelemetry } from './contract.js';
 let count = 0;
 let rejected = 0;
 let duplicates = 0;
-let dbHealthy = true;
 
-function incrementRejected() { rejected++; }
-function getRejected() { return rejected; }
+function incrementRejected() {
+  rejected++;
+}
+function getRejected() {
+  return rejected;
+}
 
 let ingestion = Promise.resolve();
 const ingest = (raw) => {
@@ -52,7 +55,7 @@ const ingestSerial = async (raw) => {
   await transaction(async () => {
     events.length = 0;
     s.id = Number(await saveTelemetry(s));
-    const active = (await alerts(s.deviceId, 5000)).filter((a) => a.active);
+    const active = await alerts(s.deviceId, undefined, true);
     for (const a of candidates)
       if (!active.some((old) => old.code === a.code)) {
         const event = {
@@ -67,7 +70,8 @@ const ingestSerial = async (raw) => {
     for (const a of active)
       if (
         !candidates.some((c) => c.code === a.code) &&
-        (!alertMeasurement[a.code] || Number.isFinite(s[alertMeasurement[a.code]]))
+        (!alertMeasurement[a.code] ||
+          Number.isFinite(s[alertMeasurement[a.code]]))
       ) {
         await resolveAlert(a.id, s.receivedAt);
         events.push({
@@ -76,10 +80,18 @@ const ingestSerial = async (raw) => {
         });
       }
   });
-  dbHealthy = true;
   count++;
   return { sample: s, events };
 };
 
-function getIngestion() { return ingestion; }
-export { ingest, count, getRejected, duplicates, dbHealthy, getIngestion, incrementRejected };
+function getIngestion() {
+  return ingestion;
+}
+export {
+  ingest,
+  count,
+  getRejected,
+  duplicates,
+  getIngestion,
+  incrementRejected,
+};

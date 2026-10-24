@@ -1,4 +1,4 @@
-﻿import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Tabs from '@radix-ui/react-tabs';
 import * as Tooltip from '@radix-ui/react-tooltip';
@@ -11,10 +11,10 @@ import {
   ChevronRight,
   CircleHelp,
   Cpu,
+  FlaskConical,
   Gauge,
   LayoutGrid,
   Menu,
-  Radio,
   ShieldCheck,
   SlidersHorizontal,
   Thermometer,
@@ -92,7 +92,7 @@ function Brand() {
         <Zap size={20} strokeWidth={1.8} />
       </span>
       <span>
-        VoltGuard<span className="brand-subtitle">MONITORING WORKSPACE</span>
+        VoltGuard<span className="brand-subtitle">Energy intelligence</span>
       </span>
     </a>
   );
@@ -178,7 +178,11 @@ function Metric({ spec, samples, latest, active, live, onSelect, selected }) {
         <span>{spec.unit}</span>
       </div>
       <div className="metric-bottom">
-        <span>
+        <span
+          className={
+            latest?.demoFields?.includes(spec.key) ? 'metric-demo' : undefined
+          }
+        >
           {latest?.demoFields?.includes(spec.key) ||
           latest?.batteryProfile === 'LI_ION_2S'
             ? measurementNote(latest, spec.key)
@@ -197,7 +201,7 @@ function Metric({ spec, samples, latest, active, live, onSelect, selected }) {
         <Sparkline
           samples={samples}
           metric={spec.key}
-          color={abnormal ? '#bd5141' : spec.color}
+          color={abnormal ? '#B23737' : '#126B70'}
         />
       </div>
     </>
@@ -261,12 +265,12 @@ function BatteryDetails({ latest }) {
 }
 function EventLog({ alerts, active }) {
   const [filter, setFilter] = useState('active');
-  const visible = filter === 'active' ? active : alerts;
+  const visible = filter === 'active' ? active : alerts.slice(0, 30);
   return (
     <section className="panel alerts" id="events">
       <div className="panel-heading">
         <div>
-          <span className="overline">CONDITION MONITORING</span>
+          <span className="overline">Conditions and recovery</span>
           <h2>Event log</h2>
         </div>
         <span className={`event-count ${active.length ? 'has-events' : ''}`}>
@@ -288,9 +292,9 @@ function EventLog({ alerts, active }) {
         </Tabs.List>
         <Tabs.Content value={filter}>
           <div className="event-table-heading">
-            <span>CONDITION</span>
-            <span>STATE</span>
-            <span>TIME</span>
+            <span>Condition</span>
+            <span>State</span>
+            <span>Time</span>
           </div>
           {visible.length ? (
             visible.map((a) => (
@@ -431,51 +435,10 @@ export default function App() {
         <a className="skip-link" href="#main">
           Skip to monitoring
         </a>
-        <aside className="sidebar">
-          <Brand />
-          <div className="workspace-label">WORKSPACE</div>
-          <Nav active={nav} onNavigate={setNav} activeCount={active.length} />
-          <div className="sidebar-device">
-            <div className="sidebar-device-heading">
-              MONITORED DEVICE<span>01</span>
-            </div>
-            <a href="#device" onClick={() => setNav('device')}>
-              <span className="device-mini-icon">
-                <Cpu size={18} />
-              </span>
-              <div>
-                <strong>{deviceId}</strong>
-                <small>
-                  <i className={`signal-dot ${live ? 'is-live' : ''}`} />
-                  {live
-                    ? 'Transmitting'
-                    : latest
-                      ? 'Signal unavailable'
-                      : 'Awaiting connection'}
-                </small>
-              </div>
-              <ChevronRight size={14} />
-            </a>
-          </div>
-          <div className="sidebar-bottom">
-            <div className="rail-system">
-              <Radio size={16} />
-              <span>
-                Local workspace
-                <small>
-                  {simulation ? 'Simulation environment' : 'Device monitoring'}
-                </small>
-              </span>
-            </div>
-            <div className="rail-footer">
-              <span>VOLTGUARD</span>
-              <span>MQTT / WS</span>
-            </div>
-          </div>
-        </aside>
         <div className="workspace">
           <header className="topbar">
             <div className="topbar-left">
+              <Brand />
               <Dialog.Root open={mobileNav} onOpenChange={setMobileNav}>
                 <Dialog.Trigger asChild>
                   <button
@@ -539,6 +502,13 @@ export default function App() {
                 <strong>{navItems.find((n) => n.id === nav)?.label}</strong>
               </div>
             </div>
+            <div className="desktop-navigation">
+              <Nav
+                active={nav}
+                onNavigate={setNav}
+                activeCount={active.length}
+              />
+            </div>
             <div className="topbar-actions">
               <div
                 role="status"
@@ -559,85 +529,120 @@ export default function App() {
             </div>
           </header>
           <main id="main">
-            <section className="page-heading" id="overview">
-              <div>
-                <div className="page-kicker">
-                  <span className="kicker-line" />
-                  MONITORING /{' '}
-                  {battery ? 'BATTERY SYSTEM' : 'ELECTRICAL SYSTEM'}
-                </div>
-                <h1>Energy overview</h1>
-                <p>
-                  Voltage, current, power, temperature, energy, state of charge,
-                  and battery health. Missing readings use labeled demo values.
-                  {latest.demoFields.length > 0 && (
-                    <span className="demo-mode">
-                      {' '}
-                      Demo values:{' '}
-                      {latest.demoFields
-                        .map(
-                          (key) =>
-                            metricSpecs.find((spec) => spec.key === key)?.title,
-                        )
-                        .join(', ')}
-                      . These are presentation examples.
-                    </span>
-                  )}
-                </p>
-              </div>
-              <button
-                className="button secondary export-button"
-                disabled={!samples.length}
-                onClick={() => exportTelemetry(measuredSamples, deviceId)}
-              >
-                <ArrowDownToLine size={15} />
-                Export readings
-              </button>
-            </section>
-            {error && (
-              <div role="alert" className="error-notice">
-                <TriangleAlert size={17} />
-                <span>{error}</span>
-              </div>
-            )}
-            <div className="context-strip">
-              <div className="context-device">
-                <Cpu size={14} />
-                <strong>{deviceId}</strong>
-                <span className="context-separator">/</span>
-                <span>{profiles[profile]}</span>
-              </div>
-              <div className="context-source">
-                <span
-                  className={`source-label ${simulation ? 'simulated' : ''}`}
-                >
-                  {!latest
-                    ? 'AWAITING SOURCE'
-                    : simulation
-                      ? 'SIMULATED DATA'
-                      : 'DEVICE DATA'}
-                </span>
-                <span className="receipt-label">
-                  Updated <time>{receipt}</time>
-                </span>
-              </div>
-            </div>
             <section
-              className="metrics"
-              aria-label="Current electrical readings"
+              className="overview"
+              id="overview"
+              aria-labelledby="overview-title"
             >
-              {metricSpecs.map((spec) => (
-                <Metric
-                  key={spec.key}
-                  spec={spec}
-                  latest={latest}
-                  samples={profileSamples}
-                  active={active}
-                  live={live}
-                  selected={selectedSignal === spec.key}
-                  onSelect={() => setSelectedSignal(spec.key)}
-                />
-              ))}
+              <div className="page-heading">
+                <div>
+                  <h1 id="overview-title">Energy overview</h1>
+                  <p>
+                    A clear view of every signal. A closer look at your system.
+                  </p>
+                </div>
+                <button
+                  className="button secondary export-button"
+                  disabled={!samples.length}
+                  onClick={() => exportTelemetry(measuredSamples, deviceId)}
+                >
+                  <ArrowDownToLine size={15} />
+                  Export readings
+                </button>
+              </div>
+              {error && (
+                <div role="alert" className="error-notice">
+                  <TriangleAlert size={17} />
+                  <span>{error}</span>
+                </div>
+              )}
+              <div className="context-strip">
+                <div className="context-device">
+                  <Cpu size={14} />
+                  <strong>{deviceId}</strong>
+                  <span className="context-separator">/</span>
+                  <span>{profiles[profile]}</span>
+                </div>
+                <div className="context-source">
+                  <span
+                    className={`source-label ${simulation ? 'simulated' : ''}`}
+                  >
+                    {!measuredLatest
+                      ? 'Awaiting source'
+                      : simulation
+                        ? 'Simulated data'
+                        : 'Device data'}
+                  </span>
+                  <span
+                    className={`overview-connection ${live ? 'is-live' : ''}`}
+                  >
+                    <i className={`signal-dot ${live ? 'is-live' : ''}`} />
+                    {connection}
+                  </span>
+                </div>
+              </div>
+              <div className="overview-summary">
+                <a
+                  className={`condition-link ${active.length ? 'has-conditions' : ''}`}
+                  href="#events"
+                  onClick={() => setNav('events')}
+                >
+                  {active.length ? (
+                    <TriangleAlert size={16} />
+                  ) : (
+                    <ShieldCheck size={16} />
+                  )}
+                  {active.length} active conditions
+                  <ChevronRight size={14} />
+                </a>
+                <span className="receipt-label">
+                  Last received <time>{receipt}</time>
+                  <span>
+                    {age === null ? 'Awaiting telemetry' : `${age}s ago`}
+                  </span>
+                </span>
+              </div>
+              {latest.demoFields.length > 0 && (
+                <p className="demo-disclosure">
+                  <FlaskConical size={16} />
+                  <span>
+                    <strong>Demo values:</strong>{' '}
+                    {latest.demoFields
+                      .map(
+                        (key) =>
+                          metricSpecs.find((spec) => spec.key === key)?.title,
+                      )
+                      .join(', ')}
+                    . These are presentation examples, not measured readings.
+                  </span>
+                </p>
+              )}
+              <section
+                className="metrics"
+                aria-label="Current electrical readings"
+              >
+                {[metricSpecs.slice(0, 4), metricSpecs.slice(4)].map(
+                  (group, index) => (
+                    <div
+                      key={index}
+                      className={`metric-group ${index ? 'supporting-readings' : 'electrical-readings'}`}
+                    >
+                      {group.map((spec) => (
+                        <Metric
+                          key={spec.key}
+                          spec={spec}
+                          latest={latest}
+                          samples={profileSamples}
+                          active={active}
+                          live={live}
+                          selected={selectedSignal === spec.key}
+                          onSelect={() => setSelectedSignal(spec.key)}
+                        />
+                      ))}
+                    </div>
+                  ),
+                )}
+              </section>
             </section>
             <section className="telemetry-section" id="telemetry">
               <div className="section-title">
@@ -686,7 +691,7 @@ export default function App() {
                 </div>
                 <aside className="panel device-panel" id="device">
                   <div className="inspector-heading">
-                    <span className="overline">DEVICE INSPECTOR</span>
+                    <span className="overline">Device inspector</span>
                     <Cpu size={16} />
                   </div>
                   <div className="device-identity">
@@ -715,7 +720,7 @@ export default function App() {
                     <div>
                       <dt>Data source</dt>
                       <dd>
-                        {!latest
+                        {!measuredLatest
                           ? 'Waiting'
                           : simulation
                             ? 'Simulator'
@@ -737,7 +742,9 @@ export default function App() {
                       </dd>
                     </div>
                   </dl>
-                  <div className="transport-heading">TRANSPORT STATUS</div>
+                  <div className="transport-heading">
+                    Connection diagnostics
+                  </div>
                   <div className="transport-row">
                     <span>MQTT broker</span>
                     <span
